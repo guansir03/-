@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberDeck // 云端终端</title>
+    <title>CyberDeck // 云端终端 [Word-Class]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Roboto+Mono:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,9 +13,8 @@
             --neon-pink: #ff00ff;
             --neon-purple: #bc13fe;
             --neon-green: #0aff0a;
-            --neon-red: #ff3333;
             --bg-dark: #050505;
-            --bg-panel: rgba(16, 20, 24, 0.9);
+            --bg-panel: rgba(16, 20, 24, 0.95);
             --text-main: #e0e6ed;
         }
 
@@ -90,8 +89,6 @@
             100% { box-shadow: 0 0 5px var(--neon-pink); transform: scale(1); }
         }
 
-        #editor img { max-width: 100%; border: 1px solid var(--neon-pink); border-radius: 4px; margin: 10px 0; }
-        
         .back-btn {
             position: absolute; top: 1rem; right: 1rem; z-index: 100;
             background: rgba(0,0,0,0.8); border: 1px solid var(--neon-cyan);
@@ -116,8 +113,50 @@
         }
         .status-online { color: var(--neon-green); background: var(--neon-green); }
         .status-offline { color: var(--neon-red); background: var(--neon-red); }
-        .status-sync { color: var(--neon-pink); background: var(--neon-pink); animation: blink 0.5s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
+        
+        /* --- 编辑器增强样式 --- */
+        .editor-toolbar {
+            display: flex; gap: 0.4rem; padding: 0.6rem 1rem;
+            background: rgba(0,0,0,0.5); border-bottom: 1px solid #333;
+            flex-wrap: wrap; align-items: center;
+        }
+        .tool-btn {
+            color: #9ca3af; padding: 0.4rem 0.6rem; border: 1px solid transparent;
+            border-radius: 4px; font-size: 0.85rem; transition: all 0.2s; cursor: pointer;
+            min-width: 32px; display: flex; align-items: center; justify-content: center;
+        }
+        .tool-btn:hover { color: var(--neon-cyan); background: rgba(0, 243, 255, 0.15); border-color: rgba(0, 243, 255, 0.3); }
+        .tool-btn.active { color: var(--neon-pink); background: rgba(255, 0, 255, 0.15); border-color: rgba(255, 0, 255, 0.3); }
+        .tool-separator { width: 1px; height: 20px; background: #4b5563; margin: 0 0.3rem; }
+        
+        /* 编辑器内部排版 */
+        #editor {
+            line-height: 1.8;
+            padding-bottom: 100px;
+        }
+        #editor h1 { font-size: 2em; font-weight: bold; color: var(--neon-cyan); margin: 0.8em 0 0.4em; border-bottom: 1px solid rgba(0, 243, 255, 0.2); padding-bottom: 0.2em; }
+        #editor h2 { font-size: 1.5em; font-weight: bold; color: var(--neon-pink); margin: 0.8em 0 0.4em; }
+        #editor h3 { font-size: 1.25em; font-weight: bold; color: var(--neon-purple); margin: 0.8em 0 0.4em; }
+        #editor blockquote { border-left: 4px solid var(--neon-cyan); padding-left: 1em; margin: 1em 0; color: #94a3b8; font-style: italic; background: rgba(0, 243, 255, 0.05); padding: 10px; }
+        #editor ul { list-style-type: disc; padding-left: 1.5em; margin: 0.5em 0; }
+        #editor ol { list-style-type: decimal; padding-left: 1.5em; margin: 0.5em 0; }
+        #editor li { margin-bottom: 0.2em; }
+        #editor hr { border: 0; border-top: 1px dashed #4b5563; margin: 2em 0; }
+        #editor img { max-width: 100%; border: 1px solid var(--neon-pink); border-radius: 4px; margin: 10px 0; box-shadow: 0 0 10px rgba(255,0,255,0.1); }
+
+        /* 大纲索引样式 */
+        .outline-item {
+            padding: 4px 8px; cursor: pointer; font-size: 0.8rem;
+            color: #9ca3af; transition: all 0.2s; border-left: 2px solid transparent;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .outline-item:hover { color: var(--neon-cyan); background: rgba(255,255,255,0.05); }
+        .outline-h1 { padding-left: 10px; font-weight: bold; color: #e0e6ed; }
+        .outline-h2 { padding-left: 25px; }
+        .outline-h3 { padding-left: 40px; font-size: 0.75rem; opacity: 0.8; }
+        
+        /* 占位符 */
+        [contenteditable]:empty:before { content: attr(placeholder); color: #555; display: block; }
     </style>
 </head>
 <body>
@@ -129,21 +168,15 @@
     <div id="view-setup" class="view-section flex-col items-center justify-center p-8 z-50">
         <div class="cyber-panel p-8 rounded-xl max-w-lg w-full border border-[var(--neon-pink)]">
             <h2 class="text-2xl font-cyber text-[var(--neon-pink)] mb-2 text-center">SYSTEM INITIALIZATION</h2>
-            <p class="text-gray-400 text-xs text-center mb-6 font-mono">CLOUD DATABASE CONNECTION REQUIRED</p>
-            
             <div class="space-y-4">
                 <div class="input-group">
-                    <label>FIREBASE CONFIG (JSON/JS OBJECT)</label>
-                    <textarea id="firebase-config-input" rows="8" placeholder="粘贴 firebaseConfig = {...} 花括号里的内容" class="text-xs font-mono"></textarea>
-                    <p class="text-[10px] text-gray-500 mt-1">* 支持直接粘贴 Firebase 控制台提供的代码片段</p>
+                    <label>FIREBASE CONFIG (JSON)</label>
+                    <textarea id="firebase-config-input" rows="8" placeholder="粘贴 firebaseConfig" class="text-xs font-mono"></textarea>
                 </div>
-                
                 <div class="input-group">
-                    <label>NETRUNNER ID (连接密钥)</label>
-                    <input type="text" id="net-id-input" placeholder="创建您的专属ID (如: Ghost_77)">
-                    <p class="text-[10px] text-gray-500 mt-1">* 多设备同步请使用相同的 ID</p>
+                    <label>NETRUNNER ID</label>
+                    <input type="text" id="net-id-input" placeholder="如: Ghost_77">
                 </div>
-
                 <button onclick="saveConfigAndBoot()" class="w-full bg-[var(--neon-pink)] text-black font-bold py-3 mt-4 font-cyber hover:bg-white transition-colors">
                     ESTABLISH UPLINK
                 </button>
@@ -159,73 +192,126 @@
         <div class="absolute top-4 left-4 font-mono text-xs text-gray-500 flex items-center gap-4">
             <div id="network-status"><span class="status-dot status-offline"></span>OFFLINE</div>
             <div id="user-display" class="text-[var(--neon-cyan)]">GUEST</div>
-            <button onclick="clearConfig()" class="hover:text-red-500 underline">[RESET CONFIG]</button>
+            <button onclick="clearConfig()" class="hover:text-red-500 underline">[RESET]</button>
         </div>
-
         <div class="text-center mb-12 relative pointer-events-none">
             <h1 class="text-6xl md:text-8xl font-cyber font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 tracking-tighter mb-2" style="text-shadow: 0 0 30px rgba(0, 243, 255, 0.3);">
                 CYBER<span class="text-[var(--neon-cyan)]">DECK</span>
             </h1>
-            <div class="h-1 w-24 bg-[var(--neon-cyan)] mx-auto mb-4 shadow-[0_0_10px_var(--neon-cyan)]"></div>
-            <p class="text-[var(--text-dim)] tracking-[0.5em] text-sm">CLOUD TERMINAL v3.2 [PATCHED]</p>
+            <p class="text-[var(--text-dim)] tracking-[0.5em] text-sm">CLOUD TERMINAL v3.4 [WORD-CLASS]</p>
         </div>
-
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
             <div onclick="window.switchView('view-notes')" class="hub-card cyber-panel p-8 rounded-xl border border-gray-700 flex flex-col items-center text-center group corner-decor">
-                <div class="w-20 h-20 rounded-full bg-black/50 border border-gray-600 flex items-center justify-center mb-6 group-hover:border-[var(--neon-cyan)] transition-colors">
-                    <i class="fas fa-brain text-3xl text-gray-400"></i>
-                </div>
-                <h2 class="text-2xl font-cyber font-bold mb-2 group-hover:text-[var(--neon-cyan)]">MEMORY BANK</h2>
-                <p class="text-gray-500 text-sm">访问云端记忆碎片<br>全平台实时同步</p>
+                <i class="fas fa-brain text-3xl text-gray-400 mb-4"></i>
+                <h2 class="text-2xl font-cyber font-bold mb-2 text-[var(--neon-cyan)]">MEMORY BANK</h2>
+                <p class="text-gray-500 text-sm">文档编辑器 & 云端同步</p>
             </div>
-
             <div onclick="window.switchView('view-game')" class="hub-card cyber-panel p-8 rounded-xl border border-gray-700 flex flex-col items-center text-center group corner-decor">
-                <div class="w-20 h-20 rounded-full bg-black/50 border border-gray-600 flex items-center justify-center mb-6 group-hover:border-[var(--neon-pink)] transition-colors">
-                    <i class="fas fa-eye text-3xl text-gray-400"></i>
-                </div>
-                <h2 class="text-2xl font-cyber font-bold mb-2 group-hover:text-[var(--neon-pink)]">VISUAL CORTEX</h2>
-                <p class="text-gray-500 text-sm">动态视力校准程序<br>提高反应速度与追踪能力</p>
+                <i class="fas fa-eye text-3xl text-gray-400 mb-4"></i>
+                <h2 class="text-2xl font-cyber font-bold mb-2 text-[var(--neon-pink)]">VISUAL CORTEX</h2>
+                <p class="text-gray-500 text-sm">动态视力训练程序</p>
             </div>
         </div>
     </div>
 
     <!-- ==================== 视图 2: 笔记应用 (NOTES) ==================== -->
-    <div id="view-notes" class="view-section flex-col md:flex-row p-4 md:p-8 gap-6 max-w-[1600px] mx-auto w-full h-full relative">
-        <button onclick="window.switchView('view-home')" class="back-btn"><i class="fas fa-arrow-left mr-2"></i>EXIT</button>
-
-        <aside class="w-full md:w-1/4 min-w-[250px] cyber-panel flex flex-col rounded-lg overflow-hidden h-[30%] md:h-full">
-            <div class="p-4 border-b border-gray-800 bg-black/40 flex justify-between items-center">
-                <h2 class="text-xl font-cyber font-bold text-[var(--neon-cyan)]">ARCHIVES</h2>
-                <div id="sync-indicator" class="text-[10px] text-gray-500"><i class="fas fa-circle"></i> READY</div>
-            </div>
-            <div class="p-3">
-                <button onclick="createNewNote()" class="w-full border border-[var(--neon-cyan)] text-[var(--neon-cyan)] py-2 px-4 text-sm font-bold hover:bg-[var(--neon-cyan)] hover:text-black transition-colors mb-2">
-                    + NEW DATA
+    <div id="view-notes" class="view-section flex-col md:flex-row p-4 md:p-6 gap-4 max-w-[1800px] mx-auto w-full h-full relative">
+        
+        <!-- 左侧：文件列表 (15%) -->
+        <aside class="w-full md:w-[18%] min-w-[200px] cyber-panel flex flex-col rounded-lg overflow-hidden h-[20%] md:h-full border-r border-gray-800">
+            <div class="p-3 border-b border-gray-800 bg-black/40 flex justify-between items-center">
+                <button onclick="window.switchView('view-home')" class="text-[10px] border border-[var(--neon-cyan)] text-[var(--neon-cyan)] px-2 py-1 hover:bg-[var(--neon-cyan)] hover:text-black transition-colors">
+                    <i class="fas fa-chevron-left"></i> HOME
                 </button>
-                <input type="text" id="search-box" placeholder="SEARCH..." class="w-full bg-black/50 border border-gray-700 text-white text-sm rounded p-2 focus:border-[var(--neon-cyan)] focus:outline-none">
+                <h2 class="text-sm font-cyber font-bold text-gray-400">FILES</h2>
             </div>
-            <div id="note-list" class="flex-1 overflow-y-auto px-2 pb-2 space-y-1"></div>
+            <div class="p-2 bg-black/20">
+                <button onclick="createNewNote()" class="w-full border border-[var(--neon-cyan)] text-[var(--neon-cyan)] py-1.5 text-xs font-bold hover:bg-[var(--neon-cyan)] hover:text-black transition-colors mb-2">
+                    + NEW DOC
+                </button>
+                <input type="text" id="search-box" placeholder="SEARCH..." class="w-full bg-black/50 border border-gray-700 text-white text-xs rounded p-1.5 focus:border-[var(--neon-cyan)] focus:outline-none">
+            </div>
+            <div id="note-list" class="flex-1 overflow-y-auto px-2 pb-2 space-y-1 mt-1 custom-scrollbar"></div>
+            <div class="p-2 text-[10px] text-gray-600 text-center border-t border-gray-800" id="sync-indicator">SYNC READY</div>
         </aside>
 
-        <main class="flex-1 cyber-panel flex flex-col rounded-lg overflow-hidden relative h-[68%] md:h-full mt-4 md:mt-0">
-            <header class="h-14 border-b border-gray-800 bg-black/40 flex items-center justify-between px-6">
-                <input type="text" id="note-title" placeholder="UNTITLED_DATA" class="bg-transparent border-none text-lg font-bold text-[var(--neon-cyan)] focus:outline-none w-1/2 font-cyber">
-                <div class="flex items-center gap-4">
+        <!-- 中间：编辑器 (65%) -->
+        <main class="flex-1 cyber-panel flex flex-col rounded-lg overflow-hidden relative h-[60%] md:h-full shadow-2xl">
+            
+            <!-- 顶部：标题 & 状态 -->
+            <header class="h-12 border-b border-gray-700 bg-black/60 flex items-center justify-between px-4 shrink-0">
+                <input type="text" id="note-title" placeholder="UNTITLED_DOCUMENT" class="bg-transparent border-none text-lg font-bold text-[var(--neon-cyan)] focus:outline-none w-2/3 font-cyber">
+                <div class="flex items-center gap-3">
                     <span id="save-status" class="text-[10px] text-gray-500 font-mono">IDLE</span>
-                    <button onclick="document.getElementById('img-up').click()" class="text-gray-400 hover:text-[var(--neon-pink)]"><i class="fas fa-image"></i></button>
-                    <button onclick="deleteCurrentNote()" class="text-gray-400 hover:text-red-500"><i class="fas fa-trash"></i></button>
-                    <input type="file" id="img-up" accept="image/*" class="hidden">
+                    <button onclick="deleteCurrentNote()" class="text-gray-400 hover:text-red-500 transition-colors px-2"><i class="fas fa-trash-alt"></i></button>
                 </div>
             </header>
-            <div class="flex-1 overflow-y-auto p-6 bg-black/20 relative custom-scrollbar">
-                <div id="editor" contenteditable="true" class="prose prose-invert max-w-none focus:outline-none min-h-full text-gray-300 font-mono leading-relaxed" placeholder="输入数据..."></div>
+
+            <!-- 顶部：Word 级工具栏 -->
+            <div class="editor-toolbar shrink-0">
+                <!-- 历史 -->
+                <button class="tool-btn" onclick="formatDoc('undo')" title="Undo"><i class="fas fa-undo"></i></button>
+                <button class="tool-btn" onclick="formatDoc('redo')" title="Redo"><i class="fas fa-redo"></i></button>
+                <div class="tool-separator"></div>
+                
+                <!-- 格式 -->
+                <button class="tool-btn font-bold" onclick="formatDoc('bold')" title="Bold">B</button>
+                <button class="tool-btn italic" onclick="formatDoc('italic')" title="Italic">I</button>
+                <button class="tool-btn underline" onclick="formatDoc('underline')" title="Underline">U</button>
+                <button class="tool-btn line-through" onclick="formatDoc('strikeThrough')" title="Strike">S</button>
+                <div class="tool-separator"></div>
+
+                <!-- 标题 -->
+                <button class="tool-btn" onclick="formatDoc('formatBlock', 'H1')" title="Heading 1"><span class="font-bold text-lg">H1</span></button>
+                <button class="tool-btn" onclick="formatDoc('formatBlock', 'H2')" title="Heading 2"><span class="font-bold text-base">H2</span></button>
+                <button class="tool-btn" onclick="formatDoc('formatBlock', 'H3')" title="Heading 3"><span class="font-bold text-sm">H3</span></button>
+                <button class="tool-btn" onclick="formatDoc('formatBlock', 'P')" title="Paragraph"><i class="fas fa-paragraph"></i></button>
+                <div class="tool-separator"></div>
+
+                <!-- 对齐 -->
+                <button class="tool-btn" onclick="formatDoc('justifyLeft')" title="Left"><i class="fas fa-align-left"></i></button>
+                <button class="tool-btn" onclick="formatDoc('justifyCenter')" title="Center"><i class="fas fa-align-center"></i></button>
+                <button class="tool-btn" onclick="formatDoc('justifyRight')" title="Right"><i class="fas fa-align-right"></i></button>
+                <div class="tool-separator"></div>
+
+                <!-- 列表 & 引用 -->
+                <button class="tool-btn" onclick="formatDoc('insertUnorderedList')" title="Bullet List"><i class="fas fa-list-ul"></i></button>
+                <button class="tool-btn" onclick="formatDoc('insertOrderedList')" title="Number List"><i class="fas fa-list-ol"></i></button>
+                <button class="tool-btn" onclick="formatDoc('indent')" title="Indent"><i class="fas fa-indent"></i></button>
+                <button class="tool-btn" onclick="formatDoc('outdent')" title="Outdent"><i class="fas fa-outdent"></i></button>
+                <button class="tool-btn" onclick="formatDoc('formatBlock', 'blockquote')" title="Quote"><i class="fas fa-quote-right"></i></button>
+                <div class="tool-separator"></div>
+
+                <!-- 插入 -->
+                <button class="tool-btn" onclick="formatDoc('insertHorizontalRule')" title="Line">HR</button>
+                <button class="tool-btn" onclick="document.getElementById('img-up').click()" title="Image"><i class="fas fa-image"></i></button>
+                <button class="tool-btn text-red-400" onclick="formatDoc('removeFormat')" title="Clear Format"><i class="fas fa-eraser"></i></button>
+                
+                <input type="file" id="img-up" accept="image/*" class="hidden">
+            </div>
+
+            <!-- 编辑内容区 -->
+            <div class="flex-1 overflow-y-auto bg-black/30 relative custom-scrollbar flex justify-center">
+                <!-- 模拟 A4 纸张效果 (但在赛博风格下是全宽的) -->
+                <div id="editor" contenteditable="true" class="w-full max-w-4xl px-8 py-6 text-gray-300 focus:outline-none" placeholder="Begin transmission..."></div>
             </div>
         </main>
+
+        <!-- 右侧：大纲索引 (17%) -->
+        <aside class="w-full md:w-[17%] min-w-[180px] cyber-panel flex flex-col rounded-lg overflow-hidden h-[20%] md:h-full border-l border-gray-800 hidden md:flex">
+            <div class="p-3 border-b border-gray-800 bg-black/40">
+                <h2 class="text-xs font-cyber font-bold text-[var(--neon-pink)]">NEURAL LINK</h2>
+                <p class="text-[9px] text-gray-500">DOCUMENT STRUCTURE</p>
+            </div>
+            <div id="outline-list" class="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                <div class="text-gray-600 text-xs text-center mt-4 italic">No headers found...</div>
+            </div>
+        </aside>
     </div>
 
-    <!-- ==================== 视图 3: 视觉游戏 (GAME) ==================== -->
+    <!-- ==================== 视图 3: 视觉游戏 ==================== -->
     <div id="view-game" class="view-section flex-col items-center justify-center relative w-full h-full">
-        <button onclick="endGame()" class="back-btn"><i class="fas fa-arrow-left mr-2"></i>ABORT</button>
+        <button onclick="endGame()" class="back-btn"><i class="fas fa-times"></i> ABORT</button>
         <div id="game-ui" class="text-center z-20 relative">
             <h2 class="text-4xl font-cyber text-[var(--neon-pink)] mb-2">TARGET PRACTICE</h2>
             <div class="flex gap-8 mb-12 justify-center font-mono text-xl">
@@ -238,9 +324,7 @@
                     <div id="game-timer" class="text-[var(--neon-cyan)] text-3xl">30.0</div>
                 </div>
             </div>
-            <button onclick="startGame()" id="start-btn" class="px-12 py-4 bg-[var(--neon-pink)] text-black font-bold font-cyber text-xl hover:bg-white hover:shadow-[0_0_20px_var(--neon-pink)] transition-all cursor-pointer">
-                INITIATE SEQUENCE
-            </button>
+            <button onclick="startGame()" id="start-btn" class="px-12 py-4 bg-[var(--neon-pink)] text-black font-bold font-cyber text-xl hover:bg-white hover:shadow-[0_0_20px_var(--neon-pink)] transition-all cursor-pointer">INITIATE SEQUENCE</button>
         </div>
         <div id="game-area" class="absolute top-0 left-0 w-full h-full hidden overflow-hidden"></div>
     </div>
@@ -261,13 +345,48 @@
         window.addEventListener('DOMContentLoaded', () => {
             const storedConfig = localStorage.getItem('cyber_firebase_config');
             const storedId = localStorage.getItem('cyber_net_id');
-
             if (storedConfig && storedId) {
                 tryInitFirebase(JSON.parse(storedConfig), storedId);
             } else {
                 window.switchView('view-setup');
             }
         });
+
+        // --- 核心：编辑器功能 ---
+        window.formatDoc = function(cmd, value) {
+            document.execCommand(cmd, false, value);
+            document.getElementById('editor').focus();
+            window.triggerSave(); // 格式变化也触发保存
+        };
+
+        // --- 核心：大纲索引生成器 ---
+        window.updateOutline = function() {
+            const editor = document.getElementById('editor');
+            const outlineList = document.getElementById('outline-list');
+            const headers = editor.querySelectorAll('h1, h2, h3');
+            
+            outlineList.innerHTML = '';
+
+            if (headers.length === 0) {
+                outlineList.innerHTML = '<div class="text-gray-600 text-xs text-center mt-4 italic">No headers...</div>';
+                return;
+            }
+
+            headers.forEach((header, index) => {
+                const item = document.createElement('div');
+                const tagName = header.tagName.toLowerCase();
+                
+                // 设置锚点ID
+                if (!header.id) header.id = `header-${index}`;
+
+                item.innerText = header.innerText || '(Empty Title)';
+                item.className = `outline-item outline-${tagName}`;
+                item.onclick = () => {
+                    header.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                };
+                outlineList.appendChild(item);
+            });
+        };
 
         async function tryInitFirebase(config, id) {
             try {
@@ -284,7 +403,7 @@
                 window.switchView('view-home');
             } catch (e) {
                 console.error("Firebase Init Failed:", e);
-                alert("连接失败：请检查配置是否正确。\n\nError: " + e.message);
+                alert("连接失败。\nError: " + e.message);
                 window.switchView('view-setup');
             }
         }
@@ -314,7 +433,7 @@
         }
 
         window.createNewNote = async function() {
-            if (!isOnline) return alert("需要连接网络才能创建数据。");
+            if (!isOnline) return alert("需要连接网络。");
             const newNote = { title: '', content: '', timestamp: Date.now() };
             try {
                 const docRef = await addDoc(collection(db, 'cyberdeck_users', netrunnerId, 'notes'), newNote);
@@ -322,6 +441,7 @@
                 document.getElementById('note-title').value = '';
                 document.getElementById('editor').innerHTML = '';
                 document.getElementById('note-title').focus();
+                window.updateOutline(); // 重置大纲
             } catch (e) { console.error("Create failed", e); }
         };
 
@@ -336,6 +456,7 @@
         function loadNoteToUI(note) {
             document.getElementById('note-title').value = note.title || '';
             document.getElementById('editor').innerHTML = note.content || '';
+            window.updateOutline(); // 加载笔记时生成大纲
         }
 
         function renderNoteList() {
@@ -346,10 +467,10 @@
                 .forEach(n => {
                     const active = n.id === currentNoteId;
                     const div = document.createElement('div');
-                    div.className = `p-3 mb-1 rounded cursor-pointer transition-all border-l-2 ${active ? 'border-[var(--neon-cyan)] bg-[var(--neon-cyan)]/10' : 'border-transparent hover:bg-white/5'}`;
+                    div.className = `p-2 mb-1 rounded cursor-pointer transition-all border-l-2 ${active ? 'border-[var(--neon-cyan)] bg-[var(--neon-cyan)]/10' : 'border-transparent hover:bg-white/5'}`;
                     div.innerHTML = `
-                        <div class="font-bold truncate text-sm ${active ? 'text-[var(--neon-cyan)]' : 'text-gray-300'}">${n.title || 'UNTITLED'}</div>
-                        <div class="text-[10px] text-gray-500 font-mono mt-1">${new Date(n.timestamp).toLocaleDateString()} ${new Date(n.timestamp).toLocaleTimeString()}</div>
+                        <div class="font-bold truncate text-xs ${active ? 'text-[var(--neon-cyan)]' : 'text-gray-300'}">${n.title || 'UNTITLED'}</div>
+                        <div class="text-[9px] text-gray-500 font-mono">${new Date(n.timestamp).toLocaleDateString()}</div>
                     `;
                     div.onclick = () => window.loadNote(n.id);
                     list.appendChild(div);
@@ -359,9 +480,12 @@
         window.triggerSave = function() {
             const status = document.getElementById('save-status');
             status.innerText = "WRITING...";
-            status.className = "text-[10px] text-[var(--neon-pink)] font-mono";
+            status.className = "text-[10px] text-[var(--neon-pink)] font-mono border-pink-500 text-pink-500";
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(saveToCloud, 1000);
+            
+            // 实时更新大纲 (防抖)
+            window.updateOutline();
         };
 
         async function saveToCloud() {
@@ -373,8 +497,8 @@
                 await updateDoc(noteRef, { title: title, content: content, timestamp: Date.now() });
                 const status = document.getElementById('save-status');
                 status.innerText = "SYNCED";
-                status.className = "text-[10px] text-[var(--neon-cyan)] font-mono";
-                setTimeout(() => status.innerText = "IDLE", 2000);
+                status.className = "text-[10px] font-mono border-cyan-500 text-[var(--neon-cyan)]";
+                setTimeout(() => { status.innerText = "IDLE"; status.className = "text-[10px] text-gray-500 font-mono border border-gray-700 px-2 py-0.5 rounded"; }, 2000);
             } catch (e) {
                 console.error("Save failed", e);
                 document.getElementById('save-status').innerText = "ERROR";
@@ -383,43 +507,34 @@
 
         window.deleteCurrentNote = async function() {
             if (!currentNoteId) return;
-            if(confirm('确认从云端删除此数据？')) {
+            if(confirm('确认删除？')) {
                 try {
                     await deleteDoc(doc(db, 'cyberdeck_users', netrunnerId, 'notes', currentNoteId));
                     currentNoteId = null;
+                    document.getElementById('note-title').value = "";
+                    document.getElementById('editor').innerHTML = "";
+                    window.updateOutline();
                 } catch (e) { alert("删除失败"); }
             }
         };
 
-        // --- 升级版解析器 (v3.2 Fix) ---
         window.saveConfigAndBoot = function() {
             let configStr = document.getElementById('firebase-config-input').value.trim();
-            
-            // 1. 自动清理 'const firebaseConfig =' 等前缀
-            if (configStr.indexOf('=') > -1) {
-                configStr = configStr.split('=')[1].trim();
-            }
-            // 2. 自动清理末尾的分号
-            if (configStr.endsWith(';')) {
-                configStr = configStr.slice(0, -1);
-            }
-            
+            if (configStr.indexOf('=') > -1) configStr = configStr.split('=')[1].trim();
+            if (configStr.endsWith(';')) configStr = configStr.slice(0, -1);
             const netId = document.getElementById('net-id-input').value || "GUEST_" + Math.floor(Math.random()*1000);
-            
             try {
-                // 3. 使用 Function 构造器解析宽松的 JS 对象 (支持无引号 key)
                 const config = new Function("return " + configStr)();
-                
                 localStorage.setItem('cyber_firebase_config', JSON.stringify(config));
                 localStorage.setItem('cyber_net_id', netId);
                 tryInitFirebase(config, netId);
             } catch (e) {
-                alert("配置解析失败！请检查是否复制了完整的 { ... } 内容。\n\n技术错误: " + e.message);
+                alert("配置解析失败！" + e.message);
             }
         };
         
         window.clearConfig = function() {
-            if(confirm("确定要重置系统配置吗？")) {
+            if(confirm("确定重置配置？")) {
                 localStorage.removeItem('cyber_firebase_config');
                 localStorage.removeItem('cyber_net_id');
                 location.reload();
@@ -428,7 +543,7 @@
 
         window.bootOffline = function() {
             isOnline = false;
-            alert("离线模式：数据将不会保存到云端。");
+            alert("离线模式");
             window.switchView('view-home');
             updateNetworkStatus('LOCAL ONLY', 'status-offline');
         };
