@@ -135,7 +135,7 @@
                 <div class="input-group">
                     <label>FIREBASE CONFIG (JSON/JS OBJECT)</label>
                     <textarea id="firebase-config-input" rows="8" placeholder="粘贴 firebaseConfig = {...} 花括号里的内容" class="text-xs font-mono"></textarea>
-                    <p class="text-[10px] text-gray-500 mt-1">* 直接粘贴 Firebase 控制台提供的代码片段即可</p>
+                    <p class="text-[10px] text-gray-500 mt-1">* 支持直接粘贴 Firebase 控制台提供的代码片段</p>
                 </div>
                 
                 <div class="input-group">
@@ -167,7 +167,7 @@
                 CYBER<span class="text-[var(--neon-cyan)]">DECK</span>
             </h1>
             <div class="h-1 w-24 bg-[var(--neon-cyan)] mx-auto mb-4 shadow-[0_0_10px_var(--neon-cyan)]"></div>
-            <p class="text-[var(--text-dim)] tracking-[0.5em] text-sm">CLOUD TERMINAL v3.1</p>
+            <p class="text-[var(--text-dim)] tracking-[0.5em] text-sm">CLOUD TERMINAL v3.2 [PATCHED]</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
@@ -391,18 +391,30 @@
             }
         };
 
+        // --- 升级版解析器 (v3.2 Fix) ---
         window.saveConfigAndBoot = function() {
             let configStr = document.getElementById('firebase-config-input').value.trim();
-            if (configStr.indexOf('=') > -1) configStr = configStr.split('=')[1].trim();
-            if (configStr.endsWith(';')) configStr = configStr.slice(0, -1);
+            
+            // 1. 自动清理 'const firebaseConfig =' 等前缀
+            if (configStr.indexOf('=') > -1) {
+                configStr = configStr.split('=')[1].trim();
+            }
+            // 2. 自动清理末尾的分号
+            if (configStr.endsWith(';')) {
+                configStr = configStr.slice(0, -1);
+            }
+            
             const netId = document.getElementById('net-id-input').value || "GUEST_" + Math.floor(Math.random()*1000);
+            
             try {
+                // 3. 使用 Function 构造器解析宽松的 JS 对象 (支持无引号 key)
                 const config = new Function("return " + configStr)();
+                
                 localStorage.setItem('cyber_firebase_config', JSON.stringify(config));
                 localStorage.setItem('cyber_net_id', netId);
                 tryInitFirebase(config, netId);
             } catch (e) {
-                alert("配置解析失败！请确保只复制了 { ... } 内容。\n\nError: " + e.message);
+                alert("配置解析失败！请检查是否复制了完整的 { ... } 内容。\n\n技术错误: " + e.message);
             }
         };
         
