@@ -133,9 +133,9 @@
             
             <div class="space-y-4">
                 <div class="input-group">
-                    <label>FIREBASE CONFIG (JSON)</label>
-                    <textarea id="firebase-config-input" rows="5" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "..."}' class="text-xs"></textarea>
-                    <p class="text-[10px] text-gray-500 mt-1">* 请粘贴 Firebase 项目设置中的完整 JSON 对象</p>
+                    <label>FIREBASE CONFIG (JSON/JS OBJECT)</label>
+                    <textarea id="firebase-config-input" rows="8" placeholder="粘贴 firebaseConfig = {...} 花括号里的内容" class="text-xs font-mono"></textarea>
+                    <p class="text-[10px] text-gray-500 mt-1">* 直接粘贴 Firebase 控制台提供的代码片段即可</p>
                 </div>
                 
                 <div class="input-group">
@@ -167,7 +167,7 @@
                 CYBER<span class="text-[var(--neon-cyan)]">DECK</span>
             </h1>
             <div class="h-1 w-24 bg-[var(--neon-cyan)] mx-auto mb-4 shadow-[0_0_10px_var(--neon-cyan)]"></div>
-            <p class="text-[var(--text-dim)] tracking-[0.5em] text-sm">CLOUD TERMINAL v3.0</p>
+            <p class="text-[var(--text-dim)] tracking-[0.5em] text-sm">CLOUD TERMINAL v3.1</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
@@ -251,15 +251,13 @@
         import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-        // --- 全局状态 ---
         let db, auth, notesUnsubscribe;
-        let localNotes = []; // 用于离线模式或缓存
+        let localNotes = []; 
         let currentNoteId = null;
         let isOnline = false;
         let netrunnerId = "GUEST";
         let saveTimeout;
 
-        // --- 1. 初始化引导系统 ---
         window.addEventListener('DOMContentLoaded', () => {
             const storedConfig = localStorage.getItem('cyber_firebase_config');
             const storedId = localStorage.getItem('cyber_net_id');
@@ -271,58 +269,43 @@
             }
         });
 
-        // 尝试连接 Firebase
         async function tryInitFirebase(config, id) {
             try {
                 const app = initializeApp(config);
                 auth = getAuth(app);
                 db = getFirestore(app);
                 netrunnerId = id;
-                
-                // 尝试启用离线持久化 (让页面加载更快)
                 try { await enableIndexedDbPersistence(db); } catch (err) {}
-
                 await signInAnonymously(auth);
-                
                 isOnline = true;
                 updateNetworkStatus('ONLINE', 'status-online');
                 document.getElementById('user-display').innerText = `NETRUNNER: ${netrunnerId}`;
-                
-                // 初始化笔记监听
                 initNotesListener();
                 window.switchView('view-home');
-
             } catch (e) {
                 console.error("Firebase Init Failed:", e);
-                alert("连接失败：请检查配置 JSON 是否正确。\n\nError: " + e.message);
+                alert("连接失败：请检查配置是否正确。\n\nError: " + e.message);
                 window.switchView('view-setup');
             }
         }
 
-        // 监听 Firestore 数据变化
         function initNotesListener() {
             if (!db) return;
             const notesRef = collection(db, 'cyberdeck_users', netrunnerId, 'notes');
             const q = query(notesRef, orderBy('timestamp', 'desc'));
-
             document.getElementById('sync-indicator').innerHTML = '<i class="fas fa-sync fa-spin text-[var(--neon-pink)]"></i> SYNCING';
 
             notesUnsubscribe = onSnapshot(q, (snapshot) => {
                 localNotes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderNoteList();
-                
-                // 如果当前有打开的笔记，刷新内容（除了正在编辑的）
                 if (currentNoteId) {
                     const current = localNotes.find(n => n.id === currentNoteId);
-                    // 只有当编辑器没焦点时才强行刷新，防止打字被打断
                     if (current && document.activeElement.id !== 'editor' && document.activeElement.id !== 'note-title') {
                        loadNoteToUI(current);
                     }
                 } else if (localNotes.length > 0 && window.location.hash !== '#editor') {
-                    // 默认加载第一条
-                    loadNote(localNotes[0].id);
+                    window.loadNote(localNotes[0].id);
                 }
-                
                 document.getElementById('sync-indicator').innerHTML = '<i class="fas fa-circle text-[var(--neon-green)]"></i> LIVE';
             }, (error) => {
                 console.error("Sync Error:", error);
@@ -330,27 +313,16 @@
             });
         }
 
-        // --- 2. 笔记逻辑 (Cloud Version) ---
-        
         window.createNewNote = async function() {
             if (!isOnline) return alert("需要连接网络才能创建数据。");
-            
-            const newNote = {
-                title: '',
-                content: '',
-                timestamp: Date.now()
-            };
-
+            const newNote = { title: '', content: '', timestamp: Date.now() };
             try {
                 const docRef = await addDoc(collection(db, 'cyberdeck_users', netrunnerId, 'notes'), newNote);
                 currentNoteId = docRef.id;
-                // 列表会自动刷新因为 onSnapshot
                 document.getElementById('note-title').value = '';
                 document.getElementById('editor').innerHTML = '';
                 document.getElementById('note-title').focus();
-            } catch (e) {
-                console.error("Create failed", e);
-            }
+            } catch (e) { console.error("Create failed", e); }
         };
 
         window.loadNote = function(id) {
@@ -370,7 +342,6 @@
             const list = document.getElementById('note-list');
             const search = document.getElementById('search-box').value.toLowerCase();
             list.innerHTML = '';
-            
             localNotes.filter(n => (n.title || '').toLowerCase().includes(search) || (n.content || '').toLowerCase().includes(search))
                 .forEach(n => {
                     const active = n.id === currentNoteId;
@@ -385,30 +356,21 @@
                 });
         }
 
-        // 自动保存逻辑
         window.triggerSave = function() {
             const status = document.getElementById('save-status');
             status.innerText = "WRITING...";
             status.className = "text-[10px] text-[var(--neon-pink)] font-mono";
-            
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(saveToCloud, 1000);
         };
 
         async function saveToCloud() {
             if (!currentNoteId || !isOnline) return;
-            
             const title = document.getElementById('note-title').value;
             const content = document.getElementById('editor').innerHTML;
-            
             try {
                 const noteRef = doc(db, 'cyberdeck_users', netrunnerId, 'notes', currentNoteId);
-                await updateDoc(noteRef, {
-                    title: title,
-                    content: content,
-                    timestamp: Date.now()
-                });
-                
+                await updateDoc(noteRef, { title: title, content: content, timestamp: Date.now() });
                 const status = document.getElementById('save-status');
                 status.innerText = "SYNCED";
                 status.className = "text-[10px] text-[var(--neon-cyan)] font-mono";
@@ -425,31 +387,27 @@
                 try {
                     await deleteDoc(doc(db, 'cyberdeck_users', netrunnerId, 'notes', currentNoteId));
                     currentNoteId = null;
-                    // UI 更新由 snapshot 处理
-                } catch (e) {
-                    alert("删除失败");
-                }
+                } catch (e) { alert("删除失败"); }
             }
         };
 
-        // --- 3. 辅助功能 ---
-        
         window.saveConfigAndBoot = function() {
-            const configStr = document.getElementById('firebase-config-input').value;
+            let configStr = document.getElementById('firebase-config-input').value.trim();
+            if (configStr.indexOf('=') > -1) configStr = configStr.split('=')[1].trim();
+            if (configStr.endsWith(';')) configStr = configStr.slice(0, -1);
             const netId = document.getElementById('net-id-input').value || "GUEST_" + Math.floor(Math.random()*1000);
-            
             try {
-                const config = JSON.parse(configStr);
+                const config = new Function("return " + configStr)();
                 localStorage.setItem('cyber_firebase_config', JSON.stringify(config));
                 localStorage.setItem('cyber_net_id', netId);
                 tryInitFirebase(config, netId);
             } catch (e) {
-                alert("配置格式错误！必须是有效的 JSON 格式。");
+                alert("配置解析失败！请确保只复制了 { ... } 内容。\n\nError: " + e.message);
             }
         };
         
         window.clearConfig = function() {
-            if(confirm("确定要重置系统配置吗？本地缓存将被清除。")) {
+            if(confirm("确定要重置系统配置吗？")) {
                 localStorage.removeItem('cyber_firebase_config');
                 localStorage.removeItem('cyber_net_id');
                 location.reload();
@@ -458,17 +416,15 @@
 
         window.bootOffline = function() {
             isOnline = false;
-            alert("离线模式：数据将不会保存到云端（仅限本次会话）。");
+            alert("离线模式：数据将不会保存到云端。");
             window.switchView('view-home');
             updateNetworkStatus('LOCAL ONLY', 'status-offline');
         };
 
         function updateNetworkStatus(text, classInfo) {
-            const el = document.getElementById('network-status');
-            el.innerHTML = `<span class="status-dot ${classInfo}"></span>${text}`;
+            document.getElementById('network-status').innerHTML = `<span class="status-dot ${classInfo}"></span>${text}`;
         }
 
-        // 绑定事件 (Module 作用域隔离，需挂载到 window)
         window.switchView = function(viewId) {
             document.querySelectorAll('.view-section').forEach(el => {
                 el.classList.remove('active');
@@ -476,12 +432,9 @@
             });
         };
 
-        // 监听输入
         document.getElementById('note-title').addEventListener('input', window.triggerSave);
         document.getElementById('editor').addEventListener('input', window.triggerSave);
         document.getElementById('search-box').addEventListener('input', renderNoteList);
-        
-        // 图片上传
         document.getElementById('img-up').addEventListener('change', function(e) {
             if(this.files && this.files[0]) {
                 const reader = new FileReader();
@@ -493,12 +446,7 @@
             }
         });
 
-        // --- 4. 游戏逻辑 (复用) ---
-        // 游戏逻辑保持不变，为了节省篇幅，这里简化引用
-        // ... (游戏逻辑与之前版本相同，仅变量挂载到 window) ...
-        let gameActive = false;
-        let score = 0;
-        let timeLeft = 30;
+        let gameActive = false; let score = 0; let timeLeft = 30;
         let gameTimerInterval, spawnTimerTimeout;
         const gameArea = document.getElementById('game-area');
 
@@ -540,7 +488,6 @@
             if (!f) window.switchView('view-home');
         };
 
-        // --- 5. 背景动画 (Module IIFE) ---
         (function() {
             const canvas = document.getElementById('bg-canvas');
             const ctx = canvas.getContext('2d');
