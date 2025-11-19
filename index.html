@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberDeck // 纯净终端 [AI+编辑器]</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Roboto+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Roboto+Mono:wght@300;400;600&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -13,15 +13,28 @@
             --neon-pink: #ff00ff;
             --neon-purple: #bc13fe;
             --neon-green: #0aff0a;
+            --neon-yellow: #fcee0a;
             --bg-dark: #050505;
             --bg-panel: rgba(16, 20, 24, 0.95);
             --text-main: #e0e6ed;
         }
 
+        /* --- 核心更新：赛博朋克风格选中态 --- */
+        ::selection {
+            background: var(--neon-pink);
+            color: #000; /* 黑色文字形成极高反差 */
+            text-shadow: 0 0 5px rgba(255, 0, 255, 0.5);
+        }
+        ::-moz-selection {
+            background: var(--neon-pink);
+            color: #000;
+            text-shadow: 0 0 5px rgba(255, 0, 255, 0.5);
+        }
+
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
-            font-family: 'Roboto Mono', monospace;
+            font-family: 'Roboto Mono', 'Noto Sans SC', 'Microsoft YaHei', sans-serif; /* 全局默认字体优化 */
             overflow: hidden;
             margin: 0;
             height: 100vh;
@@ -75,15 +88,6 @@
             border-color: var(--neon-cyan);
         }
 
-        .back-btn {
-            position: absolute; top: 1rem; right: 1rem; z-index: 100;
-            background: rgba(0,0,0,0.8); border: 1px solid var(--neon-cyan);
-            color: var(--neon-cyan); padding: 0.5rem 1rem;
-            font-family: 'Orbitron', sans-serif; font-size: 0.8rem;
-            cursor: pointer; transition: all 0.2s;
-        }
-        .back-btn:hover { background: var(--neon-cyan); color: black; box-shadow: 0 0 15px var(--neon-cyan); }
-
         /* 设置界面样式 */
         .input-group label { display: block; color: var(--neon-cyan); font-size: 0.8rem; margin-bottom: 0.5rem; font-family: 'Orbitron'; }
         .input-group input, .input-group textarea {
@@ -120,20 +124,55 @@
 
         .tool-separator { width: 1px; height: 20px; background: #4b5563; margin: 0 0.3rem; }
         
-        /* 编辑器内部排版 */
+        /* 编辑器内部排版 - 升级版 (需求1: 字体优化) */
         #editor {
             line-height: 1.8;
             padding-bottom: 100px;
+            caret-color: var(--neon-pink);
+            /* 强制使用等宽字体+无衬线字体组合，确保中文显示为黑体而非宋体 */
+            font-family: 'Roboto Mono', 'Noto Sans SC', 'Microsoft YaHei', 'Heiti SC', sans-serif;
         }
-        #editor h1 { font-size: 2em; font-weight: bold; color: var(--neon-cyan); margin: 0.8em 0 0.4em; border-bottom: 1px solid rgba(0, 243, 255, 0.2); padding-bottom: 0.2em; }
-        #editor h2 { font-size: 1.5em; font-weight: bold; color: var(--neon-pink); margin: 0.8em 0 0.4em; }
-        #editor h3 { font-size: 1.25em; font-weight: bold; color: var(--neon-purple); margin: 0.8em 0 0.4em; }
+        
+        /* --- 标题美化 --- */
+        #editor h1 { 
+            font-size: 2.2em; font-weight: 900; 
+            color: transparent; background: linear-gradient(90deg, var(--neon-cyan), #fff, var(--neon-cyan));
+            background-clip: text; -webkit-background-clip: text;
+            margin: 1em 0 0.5em; padding-bottom: 0.3em;
+            border-bottom: 2px solid var(--neon-cyan); position: relative;
+            font-family: 'Orbitron', sans-serif; text-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+        }
+        #editor h1::after { content: ' // HEADER_01'; font-size: 0.4em; color: var(--neon-cyan); position: absolute; bottom: 2px; right: 0; opacity: 0.6; letter-spacing: 2px; }
+
+        #editor h2 { 
+            font-size: 1.6em; font-weight: bold; color: var(--neon-pink); 
+            margin: 0.8em 0 0.4em; padding-left: 15px;
+            border-left: 4px solid var(--neon-pink);
+            background: linear-gradient(90deg, rgba(255,0,255,0.1), transparent);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        #editor h3 { 
+            font-size: 1.25em; font-weight: bold; color: var(--neon-purple); 
+            margin: 0.8em 0 0.4em; text-transform: uppercase; letter-spacing: 1px;
+            display: flex; align-items: center;
+        }
+        #editor h3::before { content: '>>'; margin-right: 8px; color: var(--neon-green); font-size: 0.8em; }
+
         #editor blockquote { border-left: 4px solid var(--neon-cyan); padding-left: 1em; margin: 1em 0; color: #94a3b8; font-style: italic; background: rgba(0, 243, 255, 0.05); padding: 10px; }
         #editor ul { list-style-type: disc; padding-left: 1.5em; margin: 0.5em 0; }
         #editor ol { list-style-type: decimal; padding-left: 1.5em; margin: 0.5em 0; }
         #editor li { margin-bottom: 0.2em; }
         #editor hr { border: 0; border-top: 1px dashed #4b5563; margin: 2em 0; }
-        #editor img { max-width: 100%; border: 1px solid var(--neon-pink); border-radius: 4px; margin: 10px 0; box-shadow: 0 0 10px rgba(255,0,255,0.1); }
+        
+        /* --- 图片优化 --- */
+        #editor img { 
+            max-width: 100%; border: 1px solid var(--neon-pink); border-radius: 4px; margin: 10px 0; 
+            box-shadow: 0 0 10px rgba(255,0,255,0.1); height: auto; display: inline-block; vertical-align: bottom;
+        }
+        #editor img.size-small { width: 25%; min-width: 150px; }
+        #editor img.size-medium { width: 50%; min-width: 300px; }
+        #editor img.size-large { width: 75%; min-width: 450px; }
 
         /* 大纲索引样式 */
         .outline-item {
@@ -158,6 +197,44 @@
         .ai-content { color: #ddd; font-size: 0.8rem; max-height: 200px; overflow-y: auto; }
         .ai-loading { animation: pulse 1s infinite; color: var(--neon-cyan); }
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        /* 图片尺寸选择浮窗 */
+        #image-size-modal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: var(--bg-panel); border: 1px solid var(--neon-cyan);
+            padding: 20px; z-index: 1000; box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+            display: none; flex-direction: column; gap: 10px;
+            border-radius: 8px; min-width: 200px;
+        }
+        #image-size-modal button {
+            background: rgba(0, 243, 255, 0.1); border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
+            padding: 8px 15px; cursor: pointer; transition: all 0.2s; font-family: 'Orbitron'; font-size: 0.8rem;
+        }
+        #image-size-modal button:hover { background: var(--neon-cyan); color: black; box-shadow: 0 0 10px var(--neon-cyan); }
+        
+        /* --- 赛博打字粒子特效 --- */
+        .type-particle {
+            position: fixed; pointer-events: none; font-size: 12px; font-family: 'Courier New', monospace;
+            animation: particle-fade 0.8s forwards ease-out; font-weight: bold; z-index: 9999;
+        }
+        @keyframes particle-fade { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-20px) scale(0.5); opacity: 0; } }
+
+        /* --- 保存状态指示器美化 (需求2) --- */
+        #save-status-container {
+            display: flex; align-items: center; gap: 6px; font-family: 'Orbitron', sans-serif; font-size: 0.75rem;
+            padding: 2px 8px; border-radius: 4px; transition: all 0.3s;
+        }
+        .save-status-icon { width: 6px; height: 6px; background: #555; border-radius: 50%; box-shadow: 0 0 5px #555; transition: all 0.3s; }
+        
+        /* 状态：保存中 */
+        .status-saving .save-status-icon { background: var(--neon-yellow); box-shadow: 0 0 8px var(--neon-yellow); animation: blink 0.5s infinite alternate; }
+        .status-saving { color: var(--neon-yellow); text-shadow: 0 0 5px rgba(252, 238, 10, 0.5); }
+        
+        /* 状态：已保存 */
+        .status-saved .save-status-icon { background: var(--neon-cyan); box-shadow: 0 0 8px var(--neon-cyan); }
+        .status-saved { color: var(--neon-cyan); text-shadow: 0 0 5px rgba(0, 243, 255, 0.5); }
+
+        @keyframes blink { from { opacity: 0.4; } to { opacity: 1; } }
 
         /* 占位符 */
         [contenteditable]:empty:before { content: attr(placeholder); color: #555; display: block; }
@@ -250,7 +327,11 @@
             <header class="h-12 border-b border-gray-700 bg-black/60 flex items-center justify-between px-4 shrink-0">
                 <input type="text" id="note-title" placeholder="未命名文档" class="bg-transparent border-none text-lg font-bold text-[var(--neon-cyan)] focus:outline-none w-2/3 font-cyber">
                 <div class="flex items-center gap-3">
-                    <span id="save-status" class="text-[10px] text-gray-500 font-mono">空闲</span>
+                    <!-- 升级后的保存状态指示器 -->
+                    <div id="save-status-container">
+                        <div class="save-status-icon"></div>
+                        <span id="save-status-text">READY</span>
+                    </div>
                     <button onclick="deleteCurrentNote()" class="text-gray-400 hover:text-red-500 transition-colors px-2" title="删除文档"><i class="fas fa-trash-alt"></i></button>
                 </div>
             </header>
@@ -298,7 +379,7 @@
 
                 <!-- Insert -->
                 <button class="tool-btn" onclick="formatDoc('insertHorizontalRule')" title="分割线">HR</button>
-                <button class="tool-btn" onclick="document.getElementById('img-up').click()" title="插入图片"><i class="fas fa-image"></i></button>
+                <button class="tool-btn" onclick="openImageUpload()" title="插入图片"><i class="fas fa-image"></i></button>
                 <button class="tool-btn text-red-400" onclick="formatDoc('removeFormat')" title="清除格式"><i class="fas fa-eraser"></i></button>
                 
                 <input type="file" id="img-up" accept="image/*" class="hidden">
@@ -315,6 +396,17 @@
                     <button onclick="document.getElementById('ai-overlay').style.display='none'" class="text-white hover:text-red-500"><i class="fas fa-times"></i></button>
                 </div>
                 <div id="ai-content" class="ai-content"></div>
+            </div>
+
+            <!-- 图片尺寸选择浮窗 -->
+            <div id="image-size-modal">
+                <h3 class="font-cyber text-[var(--neon-cyan)] text-lg mb-4 text-center">选择图片尺寸</h3>
+                <div class="flex flex-col gap-2">
+                    <button onclick="insertImageWithSize('size-small')">小 [25%]</button>
+                    <button onclick="insertImageWithSize('size-medium')">中 [50%]</button>
+                    <button onclick="insertImageWithSize('size-large')">大 [75%]</button>
+                    <button onclick="document.getElementById('image-size-modal').style.display='none'; pendingImageFile=null;" class="!border-gray-500 !text-gray-400 hover:!text-white mt-2">取消操作</button>
+                </div>
             </div>
         </main>
 
@@ -335,6 +427,7 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
         let db, auth, notesUnsubscribe, localNotes = [], currentNoteId = null, isOnline = false, netrunnerId = "GUEST", saveTimeout;
+        window.pendingImageFile = null; // 暴露给全局以便其他函数访问
 
         window.addEventListener('DOMContentLoaded', () => {
             const storedConfig = localStorage.getItem('cyber_firebase_config');
@@ -349,6 +442,40 @@
         // --- Editor & Formatting ---
         window.formatDoc = (cmd, value) => { document.execCommand(cmd, false, value); document.getElementById('editor').focus(); window.triggerSave(); };
         
+        // --- Tab键支持 ---
+        document.getElementById('editor').addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                document.execCommand('insertHTML', false, '&emsp;');
+            }
+        });
+
+        // --- 赛博打字粒子特效 ---
+        const particleColors = ['#00f3ff', '#ff00ff', '#bc13fe', '#0aff0a'];
+        document.getElementById('editor').addEventListener('input', function(e) {
+            const selection = window.getSelection();
+            if(selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const rects = range.getClientRects();
+                if(rects.length > 0) {
+                    const rect = rects[0];
+                    createTypeParticle(rect.left, rect.top);
+                }
+            }
+            window.triggerSave();
+        });
+
+        function createTypeParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.className = 'type-particle';
+            particle.innerText = Math.random() > 0.5 ? '1' : '0';
+            particle.style.color = particleColors[Math.floor(Math.random() * particleColors.length)];
+            particle.style.left = (x + Math.random() * 10 - 5) + 'px';
+            particle.style.top = (y - 10) + 'px';
+            document.body.appendChild(particle);
+            setTimeout(() => particle.remove(), 800);
+        }
+
         window.updateOutline = () => {
             const editor = document.getElementById('editor');
             const outlineList = document.getElementById('outline-list');
@@ -365,6 +492,35 @@
             });
         };
 
+        // --- Image Upload Logic ---
+        window.openImageUpload = () => {
+            document.getElementById('img-up').click();
+        };
+
+        document.getElementById('img-up').addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                window.pendingImageFile = this.files[0];
+                this.value = ''; 
+                document.getElementById('image-size-modal').style.display = 'flex';
+            }
+        });
+
+        window.insertImageWithSize = (sizeClass) => {
+            const file = window.pendingImageFile;
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgHtml = `<img src="${e.target.result}" class="${sizeClass}"><br>`;
+                document.getElementById('editor').focus();
+                document.execCommand('insertHTML', false, imgHtml);
+                window.triggerSave();
+                window.pendingImageFile = null;
+                document.getElementById('image-size-modal').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        };
+
         // --- AI Logic (Gemini) ---
         window.callAI = async function(mode) {
             const apiKey = localStorage.getItem('cyber_gemini_key');
@@ -377,7 +533,6 @@
 
             if (!contextText.trim()) { alert("没有可处理的数据。"); return; }
 
-            // Show UI
             const overlay = document.getElementById('ai-overlay');
             const contentDiv = document.getElementById('ai-content');
             overlay.style.display = 'block';
@@ -401,12 +556,10 @@
                 const resultText = data.candidates[0].content.parts[0].text;
                 
                 if (mode === 'expand') {
-                    // Append to editor
                     document.execCommand('insertText', false, " " + resultText);
                     contentDiv.innerText = ">> 数据注入成功。";
                     setTimeout(() => overlay.style.display = 'none', 1500);
                 } else {
-                    // Show in overlay
                     contentDiv.innerText = resultText;
                 }
             } catch (e) {
@@ -478,8 +631,10 @@
                 list.appendChild(div);
             });
         }
+        
+        // --- 保存状态逻辑更新 (需求2) ---
         window.triggerSave = () => {
-            document.getElementById('save-status').innerText = "写入中...";
+            updateSaveStatus('saving');
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(async () => {
                 if (currentNoteId && isOnline) {
@@ -488,11 +643,30 @@
                         content: document.getElementById('editor').innerHTML,
                         timestamp: Date.now()
                     });
-                    document.getElementById('save-status').innerText = "已同步";
+                    updateSaveStatus('saved');
                 }
                 window.updateOutline();
             }, 1000);
         };
+
+        function updateSaveStatus(status) {
+            const container = document.getElementById('save-status-container');
+            const text = document.getElementById('save-status-text');
+            
+            // 重置类
+            container.classList.remove('status-saving', 'status-saved');
+            
+            if (status === 'saving') {
+                container.classList.add('status-saving');
+                text.innerText = "UPLOADING...";
+            } else if (status === 'saved') {
+                container.classList.add('status-saved');
+                text.innerText = "SYNCED";
+            } else {
+                text.innerText = "READY";
+            }
+        }
+
         window.deleteCurrentNote = async () => {
             if (currentNoteId && confirm('确认删除此文档？')) {
                 await deleteDoc(doc(db, 'cyberdeck_users', netrunnerId, 'notes', currentNoteId));
@@ -521,11 +695,7 @@
         window.switchView = (viewId) => { document.querySelectorAll('.view-section').forEach(el => { el.classList.remove('active'); if (viewId === el.id) el.classList.add('active'); }); };
 
         document.getElementById('note-title').addEventListener('input', window.triggerSave);
-        document.getElementById('editor').addEventListener('input', window.triggerSave);
         document.getElementById('search-box').addEventListener('input', renderNoteList);
-        document.getElementById('img-up').addEventListener('change', function(e) {
-            if(this.files[0]) { const r = new FileReader(); r.onload = e => { document.execCommand('insertHTML', false, `<img src="${e.target.result}"><br>`); window.triggerSave(); }; r.readAsDataURL(this.files[0]); }
-        });
 
         // --- Background ---
         (function() { const c=document.getElementById('bg-canvas'), x=c.getContext('2d'); let w,h,p=[]; const r=()=>{w=c.width=window.innerWidth;h=c.height=window.innerHeight}; window.addEventListener('resize',r); r(); class P{constructor(){this.reset()}reset(){this.x=Math.random()*w;this.y=Math.random()*h;this.vx=(Math.random()-.5)*.5;this.vy=(Math.random()-.5)*.5;this.color=Math.random()>.5?'#00f3ff':'#bc13fe'}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>w||this.y<0||this.y>h)this.reset()}draw(){x.globalAlpha=0.3;x.fillStyle=this.color;x.beginPath();x.arc(this.x,this.y,1,0,Math.PI*2);x.fill()}} for(let i=0;i<80;i++)p.push(new P()); function a(){x.clearRect(0,0,w,h);x.strokeStyle='rgba(0,243,255,0.02)';x.lineWidth=1;for(let i=0;i<w;i+=60){x.beginPath();x.moveTo(i,0);x.lineTo(i,h);x.stroke()}p.forEach(i=>{i.update();i.draw()});requestAnimationFrame(a)} a(); })();
