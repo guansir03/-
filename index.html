@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberDeck // 云端终端 [Word-Class]</title>
+    <title>CyberDeck // 纯净终端 [AI+Editor]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Roboto+Mono:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -75,20 +75,6 @@
             border-color: var(--neon-cyan);
         }
 
-        .game-target {
-            position: absolute; width: 60px; height: 60px;
-            border: 2px solid var(--neon-pink); border-radius: 50%;
-            background: rgba(255, 0, 255, 0.1); cursor: crosshair;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 15px var(--neon-pink); animation: targetPulse 1s infinite;
-            z-index: 50;
-        }
-        @keyframes targetPulse {
-            0% { box-shadow: 0 0 5px var(--neon-pink); transform: scale(1); }
-            50% { box-shadow: 0 0 20px var(--neon-pink); transform: scale(1.1); }
-            100% { box-shadow: 0 0 5px var(--neon-pink); transform: scale(1); }
-        }
-
         .back-btn {
             position: absolute; top: 1rem; right: 1rem; z-index: 100;
             background: rgba(0,0,0,0.8); border: 1px solid var(--neon-cyan);
@@ -127,6 +113,11 @@
         }
         .tool-btn:hover { color: var(--neon-cyan); background: rgba(0, 243, 255, 0.15); border-color: rgba(0, 243, 255, 0.3); }
         .tool-btn.active { color: var(--neon-pink); background: rgba(255, 0, 255, 0.15); border-color: rgba(255, 0, 255, 0.3); }
+        
+        /* AI Button Specifics */
+        .ai-btn { color: var(--neon-pink); border: 1px solid rgba(255, 0, 255, 0.3); }
+        .ai-btn:hover { background: rgba(255, 0, 255, 0.2); color: white; box-shadow: 0 0 10px var(--neon-pink); }
+
         .tool-separator { width: 1px; height: 20px; background: #4b5563; margin: 0 0.3rem; }
         
         /* 编辑器内部排版 */
@@ -155,6 +146,19 @@
         .outline-h2 { padding-left: 25px; }
         .outline-h3 { padding-left: 40px; font-size: 0.75rem; opacity: 0.8; }
         
+        /* AI Overlay */
+        #ai-overlay {
+            position: absolute; bottom: 20px; right: 20px; z-index: 200;
+            background: rgba(0,0,0,0.9); border: 1px solid var(--neon-pink);
+            padding: 15px; width: 300px; border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255,0,255,0.2);
+            display: none; font-family: 'Roboto Mono';
+        }
+        .ai-header { display: flex; justify-content: space-between; color: var(--neon-pink); font-weight: bold; margin-bottom: 10px; font-family: 'Orbitron'; }
+        .ai-content { color: #ddd; font-size: 0.8rem; max-height: 200px; overflow-y: auto; }
+        .ai-loading { animation: pulse 1s infinite; color: var(--neon-cyan); }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
         /* 占位符 */
         [contenteditable]:empty:before { content: attr(placeholder); color: #555; display: block; }
     </style>
@@ -171,7 +175,12 @@
             <div class="space-y-4">
                 <div class="input-group">
                     <label>FIREBASE CONFIG (JSON)</label>
-                    <textarea id="firebase-config-input" rows="8" placeholder="粘贴 firebaseConfig" class="text-xs font-mono"></textarea>
+                    <textarea id="firebase-config-input" rows="5" placeholder="粘贴 firebaseConfig" class="text-xs font-mono"></textarea>
+                </div>
+                <div class="input-group">
+                    <label>GEMINI API KEY <span class="text-[var(--neon-cyan)]">(AI FEATURE)</span></label>
+                    <input type="password" id="gemini-key-input" placeholder="Paste Gemini API Key here">
+                    <p class="text-[9px] text-gray-500 mt-1">Required for Neural Expand & Summarization</p>
                 </div>
                 <div class="input-group">
                     <label>NETRUNNER ID</label>
@@ -198,18 +207,17 @@
             <h1 class="text-6xl md:text-8xl font-cyber font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 tracking-tighter mb-2" style="text-shadow: 0 0 30px rgba(0, 243, 255, 0.3);">
                 CYBER<span class="text-[var(--neon-cyan)]">DECK</span>
             </h1>
-            <p class="text-[var(--text-dim)] tracking-[0.5em] text-sm">CLOUD TERMINAL v3.4 [WORD-CLASS]</p>
+            <p class="text-[var(--text-dim)] tracking-[0.5em] text-sm">CLOUD TERMINAL v3.6 [PURE FOCUS]</p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
-            <div onclick="window.switchView('view-notes')" class="hub-card cyber-panel p-8 rounded-xl border border-gray-700 flex flex-col items-center text-center group corner-decor">
-                <i class="fas fa-brain text-3xl text-gray-400 mb-4"></i>
-                <h2 class="text-2xl font-cyber font-bold mb-2 text-[var(--neon-cyan)]">MEMORY BANK</h2>
-                <p class="text-gray-500 text-sm">文档编辑器 & 云端同步</p>
-            </div>
-            <div onclick="window.switchView('view-game')" class="hub-card cyber-panel p-8 rounded-xl border border-gray-700 flex flex-col items-center text-center group corner-decor">
-                <i class="fas fa-eye text-3xl text-gray-400 mb-4"></i>
-                <h2 class="text-2xl font-cyber font-bold mb-2 text-[var(--neon-pink)]">VISUAL CORTEX</h2>
-                <p class="text-gray-500 text-sm">动态视力训练程序</p>
+        
+        <!-- 单一核心卡片布局 -->
+        <div class="flex justify-center w-full">
+            <div onclick="window.switchView('view-notes')" class="hub-card cyber-panel p-10 rounded-xl border border-gray-700 flex flex-col items-center text-center group corner-decor w-full max-w-md">
+                <div class="w-24 h-24 rounded-full bg-black/50 border border-gray-600 flex items-center justify-center mb-6 group-hover:border-[var(--neon-cyan)] transition-colors">
+                    <i class="fas fa-brain text-4xl text-gray-400 group-hover:text-[var(--neon-cyan)] transition-colors"></i>
+                </div>
+                <h2 class="text-3xl font-cyber font-bold mb-2 group-hover:text-[var(--neon-cyan)]">MEMORY BANK</h2>
+                <p class="text-gray-500 text-sm">ACCESS NEURAL ARCHIVES<br>AI ENHANCED</p>
             </div>
         </div>
     </div>
@@ -217,7 +225,7 @@
     <!-- ==================== 视图 2: 笔记应用 (NOTES) ==================== -->
     <div id="view-notes" class="view-section flex-col md:flex-row p-4 md:p-6 gap-4 max-w-[1800px] mx-auto w-full h-full relative">
         
-        <!-- 左侧：文件列表 (15%) -->
+        <!-- 左侧：文件列表 -->
         <aside class="w-full md:w-[18%] min-w-[200px] cyber-panel flex flex-col rounded-lg overflow-hidden h-[20%] md:h-full border-r border-gray-800">
             <div class="p-3 border-b border-gray-800 bg-black/40 flex justify-between items-center">
                 <button onclick="window.switchView('view-home')" class="text-[10px] border border-[var(--neon-cyan)] text-[var(--neon-cyan)] px-2 py-1 hover:bg-[var(--neon-cyan)] hover:text-black transition-colors">
@@ -235,10 +243,9 @@
             <div class="p-2 text-[10px] text-gray-600 text-center border-t border-gray-800" id="sync-indicator">SYNC READY</div>
         </aside>
 
-        <!-- 中间：编辑器 (65%) -->
+        <!-- 中间：编辑器 -->
         <main class="flex-1 cyber-panel flex flex-col rounded-lg overflow-hidden relative h-[60%] md:h-full shadow-2xl">
             
-            <!-- 顶部：标题 & 状态 -->
             <header class="h-12 border-b border-gray-700 bg-black/60 flex items-center justify-between px-4 shrink-0">
                 <input type="text" id="note-title" placeholder="UNTITLED_DOCUMENT" class="bg-transparent border-none text-lg font-bold text-[var(--neon-cyan)] focus:outline-none w-2/3 font-cyber">
                 <div class="flex items-center gap-3">
@@ -247,34 +254,40 @@
                 </div>
             </header>
 
-            <!-- 顶部：Word 级工具栏 -->
+            <!-- Word 级工具栏 + AI 工具 (混合) -->
             <div class="editor-toolbar shrink-0">
-                <!-- 历史 -->
+                <!-- AI Tools -->
+                <button class="tool-btn ai-btn" onclick="callAI('expand')" title="Neural Expand"><i class="fas fa-magic"></i> ✨</button>
+                <button class="tool-btn ai-btn" onclick="callAI('summarize')" title="Summarize"><i class="fas fa-compress-arrows-alt"></i></button>
+                <button class="tool-btn ai-btn" onclick="callAI('cyberpunk')" title="Cyber-ify"><i class="fas fa-robot"></i></button>
+                <div class="tool-separator"></div>
+
+                <!-- History -->
                 <button class="tool-btn" onclick="formatDoc('undo')" title="Undo"><i class="fas fa-undo"></i></button>
                 <button class="tool-btn" onclick="formatDoc('redo')" title="Redo"><i class="fas fa-redo"></i></button>
                 <div class="tool-separator"></div>
                 
-                <!-- 格式 -->
+                <!-- Format -->
                 <button class="tool-btn font-bold" onclick="formatDoc('bold')" title="Bold">B</button>
                 <button class="tool-btn italic" onclick="formatDoc('italic')" title="Italic">I</button>
                 <button class="tool-btn underline" onclick="formatDoc('underline')" title="Underline">U</button>
                 <button class="tool-btn line-through" onclick="formatDoc('strikeThrough')" title="Strike">S</button>
                 <div class="tool-separator"></div>
 
-                <!-- 标题 -->
-                <button class="tool-btn" onclick="formatDoc('formatBlock', 'H1')" title="Heading 1"><span class="font-bold text-lg">H1</span></button>
-                <button class="tool-btn" onclick="formatDoc('formatBlock', 'H2')" title="Heading 2"><span class="font-bold text-base">H2</span></button>
-                <button class="tool-btn" onclick="formatDoc('formatBlock', 'H3')" title="Heading 3"><span class="font-bold text-sm">H3</span></button>
+                <!-- Headings -->
+                <button class="tool-btn" onclick="formatDoc('formatBlock', 'H1')" title="H1"><span class="font-bold text-lg">H1</span></button>
+                <button class="tool-btn" onclick="formatDoc('formatBlock', 'H2')" title="H2"><span class="font-bold text-base">H2</span></button>
+                <button class="tool-btn" onclick="formatDoc('formatBlock', 'H3')" title="H3"><span class="font-bold text-sm">H3</span></button>
                 <button class="tool-btn" onclick="formatDoc('formatBlock', 'P')" title="Paragraph"><i class="fas fa-paragraph"></i></button>
                 <div class="tool-separator"></div>
 
-                <!-- 对齐 -->
+                <!-- Align -->
                 <button class="tool-btn" onclick="formatDoc('justifyLeft')" title="Left"><i class="fas fa-align-left"></i></button>
                 <button class="tool-btn" onclick="formatDoc('justifyCenter')" title="Center"><i class="fas fa-align-center"></i></button>
                 <button class="tool-btn" onclick="formatDoc('justifyRight')" title="Right"><i class="fas fa-align-right"></i></button>
                 <div class="tool-separator"></div>
 
-                <!-- 列表 & 引用 -->
+                <!-- Lists & Indent -->
                 <button class="tool-btn" onclick="formatDoc('insertUnorderedList')" title="Bullet List"><i class="fas fa-list-ul"></i></button>
                 <button class="tool-btn" onclick="formatDoc('insertOrderedList')" title="Number List"><i class="fas fa-list-ol"></i></button>
                 <button class="tool-btn" onclick="formatDoc('indent')" title="Indent"><i class="fas fa-indent"></i></button>
@@ -282,7 +295,7 @@
                 <button class="tool-btn" onclick="formatDoc('formatBlock', 'blockquote')" title="Quote"><i class="fas fa-quote-right"></i></button>
                 <div class="tool-separator"></div>
 
-                <!-- 插入 -->
+                <!-- Insert -->
                 <button class="tool-btn" onclick="formatDoc('insertHorizontalRule')" title="Line">HR</button>
                 <button class="tool-btn" onclick="document.getElementById('img-up').click()" title="Image"><i class="fas fa-image"></i></button>
                 <button class="tool-btn text-red-400" onclick="formatDoc('removeFormat')" title="Clear Format"><i class="fas fa-eraser"></i></button>
@@ -290,57 +303,37 @@
                 <input type="file" id="img-up" accept="image/*" class="hidden">
             </div>
 
-            <!-- 编辑内容区 -->
             <div class="flex-1 overflow-y-auto bg-black/30 relative custom-scrollbar flex justify-center">
-                <!-- 模拟 A4 纸张效果 (但在赛博风格下是全宽的) -->
                 <div id="editor" contenteditable="true" class="w-full max-w-4xl px-8 py-6 text-gray-300 focus:outline-none" placeholder="Begin transmission..."></div>
+            </div>
+
+            <!-- AI 结果悬浮窗 -->
+            <div id="ai-overlay">
+                <div class="ai-header">
+                    <span><i class="fas fa-brain"></i> NEURAL LINK</span>
+                    <button onclick="document.getElementById('ai-overlay').style.display='none'" class="text-white hover:text-red-500"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="ai-content" class="ai-content"></div>
             </div>
         </main>
 
-        <!-- 右侧：大纲索引 (17%) -->
+        <!-- 右侧：大纲 -->
         <aside class="w-full md:w-[17%] min-w-[180px] cyber-panel flex flex-col rounded-lg overflow-hidden h-[20%] md:h-full border-l border-gray-800 hidden md:flex">
             <div class="p-3 border-b border-gray-800 bg-black/40">
                 <h2 class="text-xs font-cyber font-bold text-[var(--neon-pink)]">NEURAL LINK</h2>
                 <p class="text-[9px] text-gray-500">DOCUMENT STRUCTURE</p>
             </div>
-            <div id="outline-list" class="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
-                <div class="text-gray-600 text-xs text-center mt-4 italic">No headers found...</div>
-            </div>
+            <div id="outline-list" class="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar"></div>
         </aside>
     </div>
 
-    <!-- ==================== 视图 3: 视觉游戏 ==================== -->
-    <div id="view-game" class="view-section flex-col items-center justify-center relative w-full h-full">
-        <button onclick="endGame()" class="back-btn"><i class="fas fa-times"></i> ABORT</button>
-        <div id="game-ui" class="text-center z-20 relative">
-            <h2 class="text-4xl font-cyber text-[var(--neon-pink)] mb-2">TARGET PRACTICE</h2>
-            <div class="flex gap-8 mb-12 justify-center font-mono text-xl">
-                <div class="p-4 border border-gray-700 rounded bg-black/50 min-w-[150px]">
-                    <div class="text-xs text-gray-500">SCORE</div>
-                    <div id="game-score" class="text-[var(--neon-green)] text-3xl">0</div>
-                </div>
-                <div class="p-4 border border-gray-700 rounded bg-black/50 min-w-[150px]">
-                    <div class="text-xs text-gray-500">TIME</div>
-                    <div id="game-timer" class="text-[var(--neon-cyan)] text-3xl">30.0</div>
-                </div>
-            </div>
-            <button onclick="startGame()" id="start-btn" class="px-12 py-4 bg-[var(--neon-pink)] text-black font-bold font-cyber text-xl hover:bg-white hover:shadow-[0_0_20px_var(--neon-pink)] transition-all cursor-pointer">INITIATE SEQUENCE</button>
-        </div>
-        <div id="game-area" class="absolute top-0 left-0 w-full h-full hidden overflow-hidden"></div>
-    </div>
-
-    <!-- FIREBASE MODULES -->
+    <!-- SCRIPTS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
         import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-        let db, auth, notesUnsubscribe;
-        let localNotes = []; 
-        let currentNoteId = null;
-        let isOnline = false;
-        let netrunnerId = "GUEST";
-        let saveTimeout;
+        let db, auth, notesUnsubscribe, localNotes = [], currentNoteId = null, isOnline = false, netrunnerId = "GUEST", saveTimeout;
 
         window.addEventListener('DOMContentLoaded', () => {
             const storedConfig = localStorage.getItem('cyber_firebase_config');
@@ -352,42 +345,75 @@
             }
         });
 
-        // --- 核心：编辑器功能 ---
-        window.formatDoc = function(cmd, value) {
-            document.execCommand(cmd, false, value);
-            document.getElementById('editor').focus();
-            window.triggerSave(); // 格式变化也触发保存
-        };
-
-        // --- 核心：大纲索引生成器 ---
-        window.updateOutline = function() {
+        // --- Editor & Formatting ---
+        window.formatDoc = (cmd, value) => { document.execCommand(cmd, false, value); document.getElementById('editor').focus(); window.triggerSave(); };
+        
+        window.updateOutline = () => {
             const editor = document.getElementById('editor');
             const outlineList = document.getElementById('outline-list');
             const headers = editor.querySelectorAll('h1, h2, h3');
-            
             outlineList.innerHTML = '';
-
-            if (headers.length === 0) {
-                outlineList.innerHTML = '<div class="text-gray-600 text-xs text-center mt-4 italic">No headers...</div>';
-                return;
-            }
-
+            if (headers.length === 0) { outlineList.innerHTML = '<div class="text-gray-600 text-xs text-center mt-4 italic">No headers...</div>'; return; }
             headers.forEach((header, index) => {
                 const item = document.createElement('div');
-                const tagName = header.tagName.toLowerCase();
-                
-                // 设置锚点ID
                 if (!header.id) header.id = `header-${index}`;
-
-                item.innerText = header.innerText || '(Empty Title)';
-                item.className = `outline-item outline-${tagName}`;
-                item.onclick = () => {
-                    header.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                };
+                item.innerText = header.innerText || '(Empty)';
+                item.className = `outline-item outline-${header.tagName.toLowerCase()}`;
+                item.onclick = () => header.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 outlineList.appendChild(item);
             });
         };
 
+        // --- AI Logic (Gemini) ---
+        window.callAI = async function(mode) {
+            const apiKey = localStorage.getItem('cyber_gemini_key');
+            if (!apiKey) { alert("Access Denied: Missing Gemini API Key in settings."); return; }
+
+            const editor = document.getElementById('editor');
+            const selectedText = window.getSelection().toString();
+            const fullText = editor.innerText;
+            const contextText = selectedText || fullText;
+
+            if (!contextText.trim()) { alert("No data to process."); return; }
+
+            // Show UI
+            const overlay = document.getElementById('ai-overlay');
+            const contentDiv = document.getElementById('ai-content');
+            overlay.style.display = 'block';
+            contentDiv.innerHTML = '<div class="ai-loading">CONNECTING TO NEURAL NET...</div>';
+
+            let prompt = "";
+            if (mode === 'expand') prompt = `You are a cyberpunk creative writing assistant. Continue the following text naturally:\n\n"${contextText}"`;
+            else if (mode === 'summarize') prompt = `Summarize the following text into concise bullet points:\n\n"${contextText}"`;
+            else if (mode === 'cyberpunk') prompt = `Rewrite the following text to sound like a futuristic cyberpunk hacker (using slang like 'choom', 'preem', 'nova', 'eddies'), keep meaning:\n\n"${contextText}"`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                
+                const data = await response.json();
+                if (data.error) throw new Error(data.error.message);
+                
+                const resultText = data.candidates[0].content.parts[0].text;
+                
+                if (mode === 'expand') {
+                    // Append to editor
+                    document.execCommand('insertText', false, " " + resultText);
+                    contentDiv.innerText = ">> DATA INJECTED SUCCESSFULLY.";
+                    setTimeout(() => overlay.style.display = 'none', 1500);
+                } else {
+                    // Show in overlay
+                    contentDiv.innerText = resultText;
+                }
+            } catch (e) {
+                contentDiv.innerHTML = `<span class="text-red-500">ERROR: ${e.message}</span>`;
+            }
+        };
+
+        // --- Firebase Logic ---
         async function tryInitFirebase(config, id) {
             try {
                 const app = initializeApp(config);
@@ -403,7 +429,7 @@
                 window.switchView('view-home');
             } catch (e) {
                 console.error("Firebase Init Failed:", e);
-                alert("连接失败。\nError: " + e.message);
+                alert("Connection Failed: " + e.message);
                 window.switchView('view-setup');
             }
         }
@@ -419,231 +445,89 @@
                 renderNoteList();
                 if (currentNoteId) {
                     const current = localNotes.find(n => n.id === currentNoteId);
-                    if (current && document.activeElement.id !== 'editor' && document.activeElement.id !== 'note-title') {
-                       loadNoteToUI(current);
-                    }
+                    if (current && document.activeElement.id !== 'editor' && document.activeElement.id !== 'note-title') loadNoteToUI(current);
                 } else if (localNotes.length > 0 && window.location.hash !== '#editor') {
                     window.loadNote(localNotes[0].id);
                 }
                 document.getElementById('sync-indicator').innerHTML = '<i class="fas fa-circle text-[var(--neon-green)]"></i> LIVE';
-            }, (error) => {
-                console.error("Sync Error:", error);
-                updateNetworkStatus('ERROR', 'status-offline');
             });
         }
 
-        window.createNewNote = async function() {
-            if (!isOnline) return alert("需要连接网络。");
-            const newNote = { title: '', content: '', timestamp: Date.now() };
-            try {
-                const docRef = await addDoc(collection(db, 'cyberdeck_users', netrunnerId, 'notes'), newNote);
-                currentNoteId = docRef.id;
-                document.getElementById('note-title').value = '';
-                document.getElementById('editor').innerHTML = '';
-                document.getElementById('note-title').focus();
-                window.updateOutline(); // 重置大纲
-            } catch (e) { console.error("Create failed", e); }
+        // --- Note CRUD ---
+        window.createNewNote = async () => {
+            if (!isOnline) return alert("Need Network Connection.");
+            await addDoc(collection(db, 'cyberdeck_users', netrunnerId, 'notes'), { title: '', content: '', timestamp: Date.now() });
         };
-
-        window.loadNote = function(id) {
-            const note = localNotes.find(n => n.id === id);
-            if (!note) return;
-            currentNoteId = id;
-            loadNoteToUI(note);
-            renderNoteList();
-        };
-
+        window.loadNote = (id) => { currentNoteId = id; loadNoteToUI(localNotes.find(n => n.id === id)); renderNoteList(); };
         function loadNoteToUI(note) {
+            if(!note) return;
             document.getElementById('note-title').value = note.title || '';
             document.getElementById('editor').innerHTML = note.content || '';
-            window.updateOutline(); // 加载笔记时生成大纲
+            window.updateOutline();
         }
-
         function renderNoteList() {
             const list = document.getElementById('note-list');
             const search = document.getElementById('search-box').value.toLowerCase();
             list.innerHTML = '';
-            localNotes.filter(n => (n.title || '').toLowerCase().includes(search) || (n.content || '').toLowerCase().includes(search))
-                .forEach(n => {
-                    const active = n.id === currentNoteId;
-                    const div = document.createElement('div');
-                    div.className = `p-2 mb-1 rounded cursor-pointer transition-all border-l-2 ${active ? 'border-[var(--neon-cyan)] bg-[var(--neon-cyan)]/10' : 'border-transparent hover:bg-white/5'}`;
-                    div.innerHTML = `
-                        <div class="font-bold truncate text-xs ${active ? 'text-[var(--neon-cyan)]' : 'text-gray-300'}">${n.title || 'UNTITLED'}</div>
-                        <div class="text-[9px] text-gray-500 font-mono">${new Date(n.timestamp).toLocaleDateString()}</div>
-                    `;
-                    div.onclick = () => window.loadNote(n.id);
-                    list.appendChild(div);
-                });
+            localNotes.filter(n => (n.title || '').toLowerCase().includes(search)).forEach(n => {
+                const div = document.createElement('div');
+                div.className = `p-2 mb-1 rounded cursor-pointer transition-all border-l-2 ${n.id === currentNoteId ? 'border-[var(--neon-cyan)] bg-[var(--neon-cyan)]/10' : 'border-transparent hover:bg-white/5'}`;
+                div.innerHTML = `<div class="font-bold truncate text-xs ${n.id === currentNoteId ? 'text-[var(--neon-cyan)]' : 'text-gray-300'}">${n.title || 'UNTITLED'}</div><div class="text-[9px] text-gray-500 font-mono">${new Date(n.timestamp).toLocaleDateString()}</div>`;
+                div.onclick = () => window.loadNote(n.id);
+                list.appendChild(div);
+            });
         }
-
-        window.triggerSave = function() {
-            const status = document.getElementById('save-status');
-            status.innerText = "WRITING...";
-            status.className = "text-[10px] text-[var(--neon-pink)] font-mono border-pink-500 text-pink-500";
+        window.triggerSave = () => {
+            document.getElementById('save-status').innerText = "WRITING...";
             clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(saveToCloud, 1000);
-            
-            // 实时更新大纲 (防抖)
-            window.updateOutline();
+            saveTimeout = setTimeout(async () => {
+                if (currentNoteId && isOnline) {
+                    await updateDoc(doc(db, 'cyberdeck_users', netrunnerId, 'notes', currentNoteId), {
+                        title: document.getElementById('note-title').value,
+                        content: document.getElementById('editor').innerHTML,
+                        timestamp: Date.now()
+                    });
+                    document.getElementById('save-status').innerText = "SYNCED";
+                }
+                window.updateOutline();
+            }, 1000);
         };
-
-        async function saveToCloud() {
-            if (!currentNoteId || !isOnline) return;
-            const title = document.getElementById('note-title').value;
-            const content = document.getElementById('editor').innerHTML;
-            try {
-                const noteRef = doc(db, 'cyberdeck_users', netrunnerId, 'notes', currentNoteId);
-                await updateDoc(noteRef, { title: title, content: content, timestamp: Date.now() });
-                const status = document.getElementById('save-status');
-                status.innerText = "SYNCED";
-                status.className = "text-[10px] font-mono border-cyan-500 text-[var(--neon-cyan)]";
-                setTimeout(() => { status.innerText = "IDLE"; status.className = "text-[10px] text-gray-500 font-mono border border-gray-700 px-2 py-0.5 rounded"; }, 2000);
-            } catch (e) {
-                console.error("Save failed", e);
-                document.getElementById('save-status').innerText = "ERROR";
-            }
-        }
-
-        window.deleteCurrentNote = async function() {
-            if (!currentNoteId) return;
-            if(confirm('确认删除？')) {
-                try {
-                    await deleteDoc(doc(db, 'cyberdeck_users', netrunnerId, 'notes', currentNoteId));
-                    currentNoteId = null;
-                    document.getElementById('note-title').value = "";
-                    document.getElementById('editor').innerHTML = "";
-                    window.updateOutline();
-                } catch (e) { alert("删除失败"); }
+        window.deleteCurrentNote = async () => {
+            if (currentNoteId && confirm('Delete?')) {
+                await deleteDoc(doc(db, 'cyberdeck_users', netrunnerId, 'notes', currentNoteId));
+                currentNoteId = null; document.getElementById('note-title').value = ""; document.getElementById('editor').innerHTML = "";
             }
         };
 
-        window.saveConfigAndBoot = function() {
+        // --- Config ---
+        window.saveConfigAndBoot = () => {
             let configStr = document.getElementById('firebase-config-input').value.trim();
             if (configStr.indexOf('=') > -1) configStr = configStr.split('=')[1].trim();
             if (configStr.endsWith(';')) configStr = configStr.slice(0, -1);
-            const netId = document.getElementById('net-id-input').value || "GUEST_" + Math.floor(Math.random()*1000);
+            const netId = document.getElementById('net-id-input').value || "GUEST";
+            const geminiKey = document.getElementById('gemini-key-input').value.trim();
             try {
                 const config = new Function("return " + configStr)();
                 localStorage.setItem('cyber_firebase_config', JSON.stringify(config));
                 localStorage.setItem('cyber_net_id', netId);
+                if(geminiKey) localStorage.setItem('cyber_gemini_key', geminiKey);
                 tryInitFirebase(config, netId);
-            } catch (e) {
-                alert("配置解析失败！" + e.message);
-            }
+            } catch (e) { alert("Config Parse Error: " + e.message); }
         };
-        
-        window.clearConfig = function() {
-            if(confirm("确定重置配置？")) {
-                localStorage.removeItem('cyber_firebase_config');
-                localStorage.removeItem('cyber_net_id');
-                location.reload();
-            }
-        }
-
-        window.bootOffline = function() {
-            isOnline = false;
-            alert("离线模式");
-            window.switchView('view-home');
-            updateNetworkStatus('LOCAL ONLY', 'status-offline');
-        };
-
-        function updateNetworkStatus(text, classInfo) {
-            document.getElementById('network-status').innerHTML = `<span class="status-dot ${classInfo}"></span>${text}`;
-        }
-
-        window.switchView = function(viewId) {
-            document.querySelectorAll('.view-section').forEach(el => {
-                el.classList.remove('active');
-                if (viewId === el.id) el.classList.add('active');
-            });
-        };
+        window.clearConfig = () => { if(confirm("Reset Config?")) { localStorage.clear(); location.reload(); } };
+        window.bootOffline = () => { isOnline = false; window.switchView('view-home'); updateNetworkStatus('LOCAL ONLY', 'status-offline'); };
+        function updateNetworkStatus(text, classInfo) { document.getElementById('network-status').innerHTML = `<span class="status-dot ${classInfo}"></span>${text}`; }
+        window.switchView = (viewId) => { document.querySelectorAll('.view-section').forEach(el => { el.classList.remove('active'); if (viewId === el.id) el.classList.add('active'); }); };
 
         document.getElementById('note-title').addEventListener('input', window.triggerSave);
         document.getElementById('editor').addEventListener('input', window.triggerSave);
         document.getElementById('search-box').addEventListener('input', renderNoteList);
         document.getElementById('img-up').addEventListener('change', function(e) {
-            if(this.files && this.files[0]) {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    document.execCommand('insertHTML', false, `<img src="${e.target.result}"><br>`);
-                    window.triggerSave();
-                };
-                reader.readAsDataURL(this.files[0]);
-            }
+            if(this.files[0]) { const r = new FileReader(); r.onload = e => { document.execCommand('insertHTML', false, `<img src="${e.target.result}"><br>`); window.triggerSave(); }; r.readAsDataURL(this.files[0]); }
         });
 
-        let gameActive = false; let score = 0; let timeLeft = 30;
-        let gameTimerInterval, spawnTimerTimeout;
-        const gameArea = document.getElementById('game-area');
-
-        window.startGame = function() {
-            gameActive = true; score = 0; timeLeft = 30; updateGameUI();
-            document.getElementById('game-ui').classList.add('hidden');
-            gameArea.classList.remove('hidden'); gameArea.innerHTML = '';
-            gameTimerInterval = setInterval(() => {
-                timeLeft -= 0.1; if (timeLeft <= 0) endGame(true); updateGameUI();
-            }, 100);
-            spawnTarget();
-        };
-
-        function spawnTarget() {
-            if (!gameActive) return;
-            const t = document.createElement('div'); t.className = 'game-target';
-            const x = Math.random() * (gameArea.clientWidth - 80) + 10;
-            const y = Math.random() * (gameArea.clientHeight - 80) + 10;
-            t.style.left = x + 'px'; t.style.top = y + 'px';
-            t.onmousedown = (e) => {
-                e.stopPropagation(); score += 10; t.remove(); updateGameUI();
-                clearTimeout(spawnTimerTimeout); spawnTarget();
-            };
-            gameArea.appendChild(t);
-            spawnTimerTimeout = setTimeout(() => {
-                if (t.parentElement) { t.remove(); if (gameActive) spawnTarget(); }
-            }, Math.max(500, 2000 - score * 5));
-        }
-
-        function updateGameUI() {
-            document.getElementById('game-score').innerText = score;
-            document.getElementById('game-timer').innerText = Math.max(0, timeLeft).toFixed(1);
-        }
-
-        window.endGame = function(f=false) {
-            gameActive = false; clearInterval(gameTimerInterval); clearTimeout(spawnTimerTimeout);
-            gameArea.classList.add('hidden'); document.getElementById('game-ui').classList.remove('hidden');
-            document.getElementById('start-btn').innerText = f ? "RETRY" : "START";
-            if (!f) window.switchView('view-home');
-        };
-
-        (function() {
-            const canvas = document.getElementById('bg-canvas');
-            const ctx = canvas.getContext('2d');
-            let w, h, particles = [];
-            const resize = () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; };
-            window.addEventListener('resize', resize); resize();
-            class P {
-                constructor() { this.reset(); }
-                reset() { this.x = Math.random()*w; this.y = Math.random()*h; this.vx = (Math.random()-0.5)*0.5; this.vy = (Math.random()-0.5)*0.5; this.color = Math.random()>0.5 ? '#00f3ff' : '#bc13fe'; }
-                update() { this.x+=this.vx; this.y+=this.vy; if(this.x<0||this.x>w||this.y<0||this.y>h) this.reset(); }
-                draw() { ctx.globalAlpha = 0.3; ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, 1, 0, Math.PI*2); ctx.fill(); }
-            }
-            for(let i=0; i<80; i++) particles.push(new P());
-            function animate() {
-                ctx.clearRect(0, 0, w, h);
-                ctx.strokeStyle = 'rgba(0, 243, 255, 0.02)'; ctx.lineWidth = 1;
-                for (let x = 0; x < w; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
-                particles.forEach(p => {
-                    p.update(); p.draw();
-                    particles.forEach(p2 => {
-                        let d = Math.hypot(p.x-p2.x, p.y-p2.y);
-                        if (d < 100) { ctx.beginPath(); ctx.strokeStyle = p.color; ctx.globalAlpha = 1 - d/100; ctx.lineWidth = 0.5; ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke(); }
-                    });
-                });
-                requestAnimationFrame(animate);
-            }
-            animate();
-        })();
-
+        // --- Background ---
+        (function() { const c=document.getElementById('bg-canvas'), x=c.getContext('2d'); let w,h,p=[]; const r=()=>{w=c.width=window.innerWidth;h=c.height=window.innerHeight}; window.addEventListener('resize',r); r(); class P{constructor(){this.reset()}reset(){this.x=Math.random()*w;this.y=Math.random()*h;this.vx=(Math.random()-.5)*.5;this.vy=(Math.random()-.5)*.5;this.color=Math.random()>.5?'#00f3ff':'#bc13fe'}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>w||this.y<0||this.y>h)this.reset()}draw(){x.globalAlpha=0.3;x.fillStyle=this.color;x.beginPath();x.arc(this.x,this.y,1,0,Math.PI*2);x.fill()}} for(let i=0;i<80;i++)p.push(new P()); function a(){x.clearRect(0,0,w,h);x.strokeStyle='rgba(0,243,255,0.02)';x.lineWidth=1;for(let i=0;i<w;i+=60){x.beginPath();x.moveTo(i,0);x.lineTo(i,h);x.stroke()}p.forEach(i=>{i.update();i.draw()});requestAnimationFrame(a)} a(); })();
     </script>
 </body>
 </html>
