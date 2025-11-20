@@ -113,11 +113,7 @@
             background-color: transparent !important; 
         }
         
-        /* 关键修复：消除内部段落的默认间距，解决Word粘贴空行问题 */
-        #editor p, #editor div {
-            margin: 0;
-            padding: 0;
-        }
+        #editor p, #editor div { margin: 0; padding: 0; }
         
         /* --- 智能代码高亮样式 --- */
         #editor .cyber-keyword { color: var(--neon-pink) !important; font-weight: bold; text-shadow: 0 0 10px var(--neon-pink); }
@@ -160,10 +156,27 @@
         .ai-loading { animation: pulse 1s infinite; color: var(--neon-cyan); }
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
+        /* 图片尺寸选择模态框 */
         #image-size-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-panel); border: 1px solid var(--neon-cyan); padding: 20px; z-index: 1000; box-shadow: 0 0 20px rgba(0, 243, 255, 0.2); display: none; flex-direction: column; gap: 10px; border-radius: 8px; min-width: 200px; }
         #image-size-modal button { background: rgba(0, 243, 255, 0.1); border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 8px 15px; cursor: pointer; transition: all 0.2s; font-family: 'Orbitron'; font-size: 0.8rem; }
         #image-size-modal button:hover { background: var(--neon-cyan); color: white; box-shadow: 0 0 10px var(--neon-cyan); text-shadow: 0 0 5px rgba(0,0,0,0.5); }
         
+        /* 小说卡片编辑模态框 */
+        #card-edit-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(16, 20, 24, 0.98); border: 1px solid var(--neon-purple); padding: 25px; z-index: 1050; box-shadow: 0 0 30px rgba(188, 19, 254, 0.3); display: none; flex-direction: column; gap: 15px; border-radius: 8px; width: 90%; max-width: 500px; backdrop-filter: blur(10px); }
+        #card-edit-modal h3 { font-family: 'Orbitron'; color: var(--neon-purple); margin-bottom: 5px; }
+        #card-edit-modal input, #card-edit-modal textarea, #card-edit-modal select { width: 100%; background: rgba(0,0,0,0.6); border: 1px solid #444; color: white; padding: 10px; font-family: 'Roboto Mono'; margin-bottom: 10px; outline: none; }
+        #card-edit-modal input:focus, #card-edit-modal textarea:focus { border-color: var(--neon-cyan); }
+        
+        /* 卡片列表样式 */
+        .novel-card { background: rgba(255,255,255,0.03); border: 1px solid transparent; padding: 10px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; border-radius: 4px; }
+        .novel-card:hover { border-color: var(--neon-purple); background: rgba(188, 19, 254, 0.1); transform: translateX(2px); }
+        .novel-card-title { font-family: 'Orbitron'; color: #fff; font-size: 0.85rem; margin-bottom: 4px; }
+        .novel-card-preview { font-size: 0.7rem; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .novel-card-tag { display: inline-block; font-size: 0.6rem; padding: 2px 6px; border-radius: 2px; margin-right: 5px; text-transform: uppercase; font-weight: bold; }
+        .tag-char { background: rgba(255, 0, 255, 0.2); color: var(--neon-pink); border: 1px solid var(--neon-pink); }
+        .tag-world { background: rgba(0, 243, 255, 0.2); color: var(--neon-cyan); border: 1px solid var(--neon-cyan); }
+        .tag-plot { background: rgba(252, 238, 10, 0.2); color: var(--neon-yellow); border: 1px solid var(--neon-yellow); }
+
         .type-particle { position: fixed; pointer-events: none; font-size: 12px; font-family: 'Courier New', monospace; animation: particle-fade 0.8s forwards ease-out; font-weight: bold; z-index: 9999; }
         @keyframes particle-fade { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-20px) scale(0.5); opacity: 0; } }
 
@@ -223,31 +236,46 @@
             <h1 class="text-6xl md:text-8xl font-cyber font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 tracking-tighter mb-2" style="text-shadow: 0 0 30px rgba(0, 243, 255, 0.3);">
                 CYBER<span class="text-[var(--neon-cyan)]">DECK</span>
             </h1>
-            <p class="text-[var(--text-dim)] tracking-[0.5em] text-sm">云端终端 v3.6 [纯净聚焦版]</p>
+            <p class="text-[var(--text-dim)] tracking-[0.5em] text-sm">云端终端 v3.7 [双核驱动版]</p>
         </div>
-        <div class="flex justify-center w-full">
-            <div onclick="window.switchView('view-notes')" class="hub-card cyber-panel p-10 rounded-xl border border-gray-700 flex flex-col items-center text-center group corner-decor w-full max-w-md">
-                <div class="w-24 h-24 rounded-full bg-black/50 border border-gray-600 flex items-center justify-center mb-6 group-hover:border-[var(--neon-cyan)] transition-colors">
-                    <i class="fas fa-brain text-4xl text-gray-400 group-hover:text-[var(--neon-cyan)] transition-colors"></i>
+        
+        <!-- 双模块入口 -->
+        <div class="flex flex-col md:flex-row justify-center w-full gap-8 px-4">
+            <!-- 笔记模块 -->
+            <div onclick="window.enterApp('note')" class="hub-card cyber-panel p-10 rounded-xl border border-gray-700 flex flex-col items-center text-center group corner-decor w-full max-w-sm relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--neon-cyan)] to-transparent opacity-50"></div>
+                <div class="w-20 h-20 rounded-full bg-black/50 border border-gray-600 flex items-center justify-center mb-6 group-hover:border-[var(--neon-cyan)] transition-colors">
+                    <i class="fas fa-brain text-3xl text-gray-400 group-hover:text-[var(--neon-cyan)] transition-colors"></i>
                 </div>
-                <h2 class="text-3xl font-cyber font-bold mb-2 group-hover:text-[var(--neon-cyan)]">MEMORY BANK</h2>
-                <p class="text-gray-500 text-sm">访问神经档案<br>AI 辅助增强</p>
+                <h2 class="text-2xl font-cyber font-bold mb-2 group-hover:text-[var(--neon-cyan)]">MEMORY BANK</h2>
+                <p class="text-gray-500 text-xs tracking-widest">神经档案 // 碎片化记录</p>
+            </div>
+
+            <!-- 小说模块 -->
+            <div onclick="window.enterApp('novel')" class="hub-card cyber-panel p-10 rounded-xl border border-gray-700 flex flex-col items-center text-center group corner-decor w-full max-w-sm relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[var(--neon-purple)] to-transparent opacity-50"></div>
+                <div class="w-20 h-20 rounded-full bg-black/50 border border-gray-600 flex items-center justify-center mb-6 group-hover:border-[var(--neon-purple)] transition-colors">
+                    <i class="fas fa-book-journal-whills text-3xl text-gray-400 group-hover:text-[var(--neon-purple)] transition-colors"></i>
+                </div>
+                <h2 class="text-2xl font-cyber font-bold mb-2 group-hover:text-[var(--neon-purple)]">STORY FORGE</h2>
+                <p class="text-gray-500 text-xs tracking-widest">创世引擎 // 小说创作</p>
             </div>
         </div>
     </div>
 
-    <!-- View Notes -->
-    <div id="view-notes" class="view-section flex-col md:flex-row p-4 md:p-6 gap-4 max-w-[1800px] mx-auto w-full h-full relative">
+    <!-- View Editor (Unified for Note & Novel) -->
+    <div id="view-editor" class="view-section flex-col md:flex-row p-4 md:p-6 gap-4 max-w-[1800px] mx-auto w-full h-full relative">
+        <!-- 左侧：列表 (笔记/章节) -->
         <aside class="w-full md:w-[18%] min-w-[200px] cyber-panel flex flex-col rounded-lg overflow-hidden h-[20%] md:h-full border-r border-gray-800">
             <div class="p-3 border-b border-gray-800 bg-black/40 flex justify-between items-center">
                 <button onclick="window.switchView('view-home')" class="text-[10px] border border-[var(--neon-cyan)] text-[var(--neon-cyan)] px-2 py-1 hover:bg-[var(--neon-cyan)] hover:text-white transition-colors">
                     <i class="fas fa-chevron-left"></i> 主页
                 </button>
-                <h2 class="text-sm font-cyber font-bold text-gray-400">文件列表</h2>
+                <h2 id="list-title" class="text-sm font-cyber font-bold text-gray-400">文件列表</h2>
             </div>
             <div class="p-2 bg-black/20">
                 <button onclick="createNewNote()" class="w-full border border-[var(--neon-cyan)] text-[var(--neon-cyan)] py-1.5 text-xs font-bold hover:bg-[var(--neon-cyan)] hover:text-white transition-colors mb-2">
-                    + 新建文档
+                    + 新建
                 </button>
                 <input type="text" id="search-box" placeholder="搜索..." class="w-full bg-black/50 border border-gray-700 text-white text-xs rounded p-1.5 focus:border-[var(--neon-cyan)] focus:outline-none">
             </div>
@@ -255,6 +283,7 @@
             <div class="p-2 text-[10px] text-gray-600 text-center border-t border-gray-800" id="sync-indicator">同步就绪</div>
         </aside>
 
+        <!-- 中间：编辑器核心 -->
         <main class="flex-1 cyber-panel flex flex-col rounded-lg overflow-hidden relative h-[60%] md:h-full shadow-2xl">
             <header class="h-12 border-b border-gray-700 bg-black/60 flex items-center justify-between px-4 shrink-0">
                 <input type="text" id="note-title" placeholder="未命名文档" class="bg-transparent border-none text-lg font-bold text-[var(--neon-cyan)] focus:outline-none w-2/3 font-cyber">
@@ -271,7 +300,6 @@
                 <button class="tool-btn ai-btn" onclick="callAI('expand')" title="AI 智能续写"><i class="fas fa-magic"></i> ✨</button>
                 <button class="tool-btn ai-btn" onclick="callAI('summarize')" title="AI 生成摘要"><i class="fas fa-compress-arrows-alt"></i></button>
                 <button class="tool-btn ai-btn" onclick="callAI('cyberpunk')" title="赛博朋克风润色"><i class="fas fa-robot"></i></button>
-                <!-- 智能高亮按钮 -->
                 <button class="tool-btn ai-btn" onclick="applySmartHighlight()" title="智能代码着色"><i class="fas fa-code"></i> 扫描代码</button>
                 <div class="tool-separator"></div>
                 <button class="tool-btn" onclick="formatDoc('undo')" title="撤销"><i class="fas fa-undo"></i></button>
@@ -315,6 +343,7 @@
                 <div id="ai-content" class="ai-content"></div>
             </div>
 
+            <!-- 图片尺寸选择模态框 -->
             <div id="image-size-modal">
                 <h3 class="font-cyber text-[var(--neon-cyan)] text-lg mb-4 text-center">选择图片尺寸</h3>
                 <div class="flex flex-col gap-2">
@@ -324,14 +353,37 @@
                     <button onclick="document.getElementById('image-size-modal').style.display='none'; pendingImageFile=null;" class="!border-gray-500 !text-gray-400 hover:!text-white mt-2">取消操作</button>
                 </div>
             </div>
+            
+            <!-- 小说设定卡片编辑模态框 -->
+            <div id="card-edit-modal">
+                <h3 id="card-modal-title">编辑设定卡片</h3>
+                <input type="text" id="card-title-input" placeholder="卡片名称 (如: 主角-K)">
+                <select id="card-type-select">
+                    <option value="char">人物 (Character)</option>
+                    <option value="world">背景/设定 (World)</option>
+                    <option value="plot">大纲/剧情 (Plot)</option>
+                </select>
+                <textarea id="card-content-input" rows="10" placeholder="输入详细设定..."></textarea>
+                <div class="flex gap-2">
+                    <button onclick="saveCardData()" class="flex-1 !bg-[var(--neon-purple)] !text-white hover:!bg-white hover:!text-[var(--neon-purple)]">保存卡片</button>
+                    <button onclick="deleteCardData()" id="card-delete-btn" class="!bg-red-900/50 !text-red-400 !border-red-500 hover:!bg-red-600 hover:!text-white">删除</button>
+                    <button onclick="document.getElementById('card-edit-modal').style.display='none'" class="flex-1 !border-gray-500 !text-gray-400">取消</button>
+                </div>
+            </div>
         </main>
 
+        <!-- 右侧：侧边栏 (笔记大纲 / 小说卡片) -->
         <aside class="w-full md:w-[17%] min-w-[180px] cyber-panel flex flex-col rounded-lg overflow-hidden h-[20%] md:h-full border-l border-gray-800 hidden md:flex">
-            <div class="p-3 border-b border-gray-800 bg-black/40">
-                <h2 class="text-xs font-cyber font-bold text-[var(--neon-pink)]">NEURAL LINK</h2>
-                <p class="text-[9px] text-gray-500">文档结构</p>
+            <div class="p-3 border-b border-gray-800 bg-black/40 flex justify-between items-center">
+                <h2 id="right-sidebar-title" class="text-xs font-cyber font-bold text-[var(--neon-pink)]">NEURAL LINK</h2>
+                <button id="add-card-btn" onclick="openNewCardModal()" class="text-[10px] border border-[var(--neon-purple)] text-[var(--neon-purple)] px-2 py-0.5 hover:bg-[var(--neon-purple)] hover:text-white transition-colors hidden">
+                    + 卡片
+                </button>
             </div>
-            <div id="outline-list" class="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar"></div>
+            <!-- 容器：文档大纲 (笔记模式) -->
+            <div id="outline-list" class="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar" style="display:block;"></div>
+            <!-- 容器：设定卡片 (小说模式) -->
+            <div id="cards-list" class="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar" style="display:none;"></div>
         </aside>
     </div>
 
@@ -340,7 +392,12 @@
         import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-        let db, auth, notesUnsubscribe, localNotes = [], currentNoteId = null, isOnline = false, netrunnerId = "GUEST", saveTimeout;
+        let db, auth;
+        let notesUnsubscribe = null, cardsUnsubscribe = null;
+        let localNotes = [], localCards = [];
+        let currentNoteId = null, currentCardId = null;
+        let isOnline = false, netrunnerId = "GUEST", saveTimeout;
+        let currentAppMode = 'note'; // 'note' or 'novel'
         window.pendingImageFile = null;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -353,26 +410,61 @@
             }
         });
 
+        // --- 模式切换核心逻辑 ---
+        window.enterApp = (mode) => {
+            currentAppMode = mode;
+            // 重置当前选中的文档
+            currentNoteId = null;
+            document.getElementById('note-title').value = "";
+            document.getElementById('editor').innerHTML = "";
+            
+            // UI 适配
+            const listTitle = document.getElementById('list-title');
+            const rightTitle = document.getElementById('right-sidebar-title');
+            const outlineList = document.getElementById('outline-list');
+            const cardsList = document.getElementById('cards-list');
+            const addCardBtn = document.getElementById('add-card-btn');
+            const noteTitleInput = document.getElementById('note-title');
+
+            if (mode === 'novel') {
+                listTitle.innerText = "章节列表 (Chapters)";
+                rightTitle.innerText = "世界观设定 (World DB)";
+                rightTitle.className = "text-xs font-cyber font-bold text-[var(--neon-purple)]";
+                outlineList.style.display = 'none';
+                cardsList.style.display = 'block';
+                addCardBtn.style.display = 'block';
+                noteTitleInput.placeholder = "第 X 章：未命名";
+                initCardsListener(); // 启动卡片监听
+            } else {
+                listTitle.innerText = "文件列表 (Notes)";
+                rightTitle.innerText = "文档结构 (Outline)";
+                rightTitle.className = "text-xs font-cyber font-bold text-[var(--neon-pink)]";
+                outlineList.style.display = 'block';
+                cardsList.style.display = 'none';
+                addCardBtn.style.display = 'none';
+                noteTitleInput.placeholder = "未命名文档";
+                if (cardsUnsubscribe) cardsUnsubscribe(); // 停止卡片监听
+            }
+
+            // 重新挂载左侧列表监听 (Collection 不同)
+            initNotesListener(); 
+            window.switchView('view-editor');
+        };
+
         window.formatDoc = (cmd, value) => { document.execCommand(cmd, false, value); document.getElementById('editor').focus(); window.triggerSave(); };
         
         document.getElementById('editor').addEventListener('keydown', function(e) {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                document.execCommand('insertHTML', false, '&emsp;');
-            }
+            if (e.key === 'Tab') { e.preventDefault(); document.execCommand('insertHTML', false, '&emsp;'); }
         });
 
-        // --- 解决 Word 粘贴空行问题的核心逻辑 ---
         document.getElementById('editor').addEventListener('paste', function(e) {
-            e.preventDefault(); // 阻止默认粘贴
-            // 获取纯文本，这将去除 Word 的所有富文本格式（包括导致空行的 <p> 标签）
+            e.preventDefault();
             let text = (e.clipboardData || window.clipboardData).getData('text/plain');
-            // 可选：在这里进一步清洗 text，比如 text = text.replace(/\r\n/g, '\n');
             document.execCommand('insertText', false, text);
             window.triggerSave();
         });
 
-        // --- 智能高亮引擎 (单次扫描) ---
+        // --- 智能高亮 (单次扫描) ---
         window.applySmartHighlight = function() {
             const editor = document.getElementById('editor');
             const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, null, false);
@@ -381,14 +473,11 @@
 
             textNodes.forEach(node => {
                 if (node.parentNode.className && typeof node.parentNode.className === 'string' && node.parentNode.className.includes('cyber-')) return;
-                
                 let text = node.nodeValue;
                 const isCodeLike = /[{};#]|\/\/|\b(int|void|if|return|include)\b/.test(text);
-                
                 if (isCodeLike && text.trim().length > 0) {
                     let safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
                     const regex = /(\/\/.*)|(".*?"|&lt;.*?&gt;)|(#\w+)|(\b(?:int|void|char|float|double|struct|class|const|static|volatile|unsigned|signed|if|else|while|for|switch|case|break|default|return|typedef|extern)\b)|(\b\d+|0x[0-9a-fA-F]+\b)|(\b[A-Z_][A-Z0-9_]*\b)/g;
-
                     let newHtml = safeText.replace(regex, function(match, comment, string, macro, keyword, number, type) {
                         if (comment) return `<span class="cyber-comment">${comment}</span>`;
                         if (string) return `<span class="cyber-string">${string}</span>`;
@@ -398,28 +487,20 @@
                         if (type) return `<span class="cyber-type">${type}</span>`;
                         return match;
                     });
-
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = newHtml;
-                    
                     const parent = node.parentNode;
-                    while (tempDiv.firstChild) {
-                        parent.insertBefore(tempDiv.firstChild, node);
-                    }
+                    while (tempDiv.firstChild) { parent.insertBefore(tempDiv.firstChild, node); }
                     parent.removeChild(node);
                 }
             });
-            
             window.triggerSave();
         };
 
-        // --- 输入与打字特效 ---
+        // --- 输入特效 ---
         const particleColors = ['#00f3ff', '#ff00ff', '#bc13fe', '#0aff0a'];
         document.getElementById('editor').addEventListener('input', function(e) {
-            if (e.inputType === 'insertFromPaste') {
-                // 粘贴时由 paste 事件处理，这里忽略
-                return;
-            }
+            if (e.inputType === 'insertFromPaste') return;
             const selection = window.getSelection();
             if(selection.rangeCount > 0) {
                 const range = selection.getRangeAt(0);
@@ -444,6 +525,7 @@
         }
 
         window.updateOutline = () => {
+            if (currentAppMode === 'novel') return; // 小说模式不更新大纲
             const editor = document.getElementById('editor');
             const outlineList = document.getElementById('outline-list');
             const headers = editor.querySelectorAll('h1, h2, h3');
@@ -459,10 +541,8 @@
             });
         };
 
-        window.openImageUpload = () => {
-            document.getElementById('img-up').click();
-        };
-
+        // --- 图片处理 ---
+        window.openImageUpload = () => { document.getElementById('img-up').click(); };
         document.getElementById('img-up').addEventListener('change', function(e) {
             if (this.files && this.files[0]) {
                 window.pendingImageFile = this.files[0];
@@ -470,7 +550,6 @@
                 document.getElementById('image-size-modal').style.display = 'flex';
             }
         });
-
         window.insertImageWithSize = (sizeClass) => {
             const file = window.pendingImageFile;
             if (!file) return;
@@ -484,6 +563,210 @@
                 document.getElementById('image-size-modal').style.display = 'none';
             };
             reader.readAsDataURL(file);
+        };
+
+        // --- 小说设定卡片逻辑 ---
+        window.openNewCardModal = () => {
+            currentCardId = null;
+            document.getElementById('card-modal-title').innerText = "新建设定卡片";
+            document.getElementById('card-title-input').value = "";
+            document.getElementById('card-content-input').value = "";
+            document.getElementById('card-type-select').value = "char";
+            document.getElementById('card-delete-btn').style.display = "none";
+            document.getElementById('card-edit-modal').style.display = 'flex';
+        };
+
+        window.openEditCardModal = (cardId) => {
+            const card = localCards.find(c => c.id === cardId);
+            if(!card) return;
+            currentCardId = cardId;
+            document.getElementById('card-modal-title').innerText = "编辑设定卡片";
+            document.getElementById('card-title-input').value = card.title || "";
+            document.getElementById('card-content-input').value = card.content || "";
+            document.getElementById('card-type-select').value = card.type || "char";
+            document.getElementById('card-delete-btn').style.display = "block";
+            document.getElementById('card-edit-modal').style.display = 'flex';
+        };
+
+        window.saveCardData = async () => {
+            if (!isOnline) return alert("需要网络连接。");
+            const title = document.getElementById('card-title-input').value;
+            const content = document.getElementById('card-content-input').value;
+            const type = document.getElementById('card-type-select').value;
+            
+            const cardsRef = collection(db, 'cyberdeck_users', netrunnerId, 'novel_cards');
+            
+            if (currentCardId) {
+                await updateDoc(doc(db, 'cyberdeck_users', netrunnerId, 'novel_cards', currentCardId), {
+                    title, content, type, timestamp: Date.now()
+                });
+            } else {
+                await addDoc(cardsRef, {
+                    title, content, type, timestamp: Date.now()
+                });
+            }
+            document.getElementById('card-edit-modal').style.display = 'none';
+        };
+
+        window.deleteCardData = async () => {
+            if (currentCardId && confirm('删除此卡片？')) {
+                await deleteDoc(doc(db, 'cyberdeck_users', netrunnerId, 'novel_cards', currentCardId));
+                document.getElementById('card-edit-modal').style.display = 'none';
+            }
+        };
+
+        function renderCardList() {
+            const list = document.getElementById('cards-list');
+            list.innerHTML = '';
+            // 按类型排序: char, world, plot
+            const typeOrder = { 'char': 1, 'world': 2, 'plot': 3 };
+            localCards.sort((a, b) => (typeOrder[a.type] || 9) - (typeOrder[b.type] || 9) || b.timestamp - a.timestamp);
+            
+            localCards.forEach(card => {
+                const div = document.createElement('div');
+                div.className = 'novel-card';
+                let tagClass = 'tag-char';
+                let tagName = '人';
+                if(card.type === 'world') { tagClass = 'tag-world'; tagName = '设'; }
+                if(card.type === 'plot') { tagClass = 'tag-plot'; tagName = '纲'; }
+                
+                div.innerHTML = `
+                    <div class="novel-card-title">
+                        <span class="novel-card-tag ${tagClass}">${tagName}</span>${card.title || '未命名'}
+                    </div>
+                    <div class="novel-card-preview">${card.content || '...'}</div>
+                `;
+                div.onclick = () => window.openEditCardModal(card.id);
+                list.appendChild(div);
+            });
+        }
+
+        // --- Firebase 监听 ---
+        async function tryInitFirebase(config, id) {
+            try {
+                const app = initializeApp(config);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                netrunnerId = id;
+                try { await enableIndexedDbPersistence(db); } catch (err) {}
+                await signInAnonymously(auth);
+                isOnline = true;
+                updateNetworkStatus('在线', 'status-online');
+                document.getElementById('user-display').innerText = `网际行者: ${netrunnerId}`;
+                window.switchView('view-home'); // 先去主页
+            } catch (e) {
+                console.error("Firebase Init Failed:", e);
+                alert("连接失败: " + e.message);
+                window.switchView('view-setup');
+            }
+        }
+
+        function initNotesListener() {
+            if (!db) return;
+            // 根据当前模式决定集合名称：'notes' 或 'novel_chapters'
+            const collectionName = currentAppMode === 'novel' ? 'novel_chapters' : 'notes';
+            const notesRef = collection(db, 'cyberdeck_users', netrunnerId, collectionName);
+            const q = query(notesRef, orderBy('timestamp', 'desc'));
+            
+            document.getElementById('sync-indicator').innerHTML = '<i class="fas fa-sync fa-spin text-[var(--neon-pink)]"></i> 同步中';
+
+            if(notesUnsubscribe) notesUnsubscribe(); // 取消旧监听
+
+            notesUnsubscribe = onSnapshot(q, (snapshot) => {
+                localNotes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderNoteList();
+                // 自动加载逻辑：只有当编辑器为空且有数据时才自动加载第一个
+                if (!currentNoteId && localNotes.length > 0 && window.location.hash !== '#editor') {
+                   // window.loadNote(localNotes[0].id); // 可选：是否自动打开第一个
+                }
+                document.getElementById('sync-indicator').innerHTML = '<i class="fas fa-circle text-[var(--neon-green)]"></i> 已连接';
+            });
+        }
+
+        function initCardsListener() {
+            if (!db) return;
+            const cardsRef = collection(db, 'cyberdeck_users', netrunnerId, 'novel_cards');
+            const q = query(cardsRef, orderBy('timestamp', 'desc'));
+            
+            if(cardsUnsubscribe) cardsUnsubscribe();
+
+            cardsUnsubscribe = onSnapshot(q, (snapshot) => {
+                localCards = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderCardList();
+            });
+        }
+
+        // --- Note CRUD ---
+        window.createNewNote = async () => {
+            if (!isOnline) return alert("需要网络连接。");
+            const collectionName = currentAppMode === 'novel' ? 'novel_chapters' : 'notes';
+            const defaultTitle = currentAppMode === 'novel' ? `第 ${localNotes.length + 1} 章` : '未命名文档';
+            await addDoc(collection(db, 'cyberdeck_users', netrunnerId, collectionName), { 
+                title: defaultTitle, content: '', timestamp: Date.now() 
+            });
+        };
+
+        window.loadNote = (id) => { 
+            currentNoteId = id; 
+            const note = localNotes.find(n => n.id === id);
+            if(!note) return;
+            document.getElementById('note-title').value = note.title || '';
+            document.getElementById('editor').innerHTML = note.content || '';
+            window.updateOutline();
+            renderNoteList(); 
+        };
+
+        function renderNoteList() {
+            const list = document.getElementById('note-list');
+            const search = document.getElementById('search-box').value.toLowerCase();
+            list.innerHTML = '';
+            localNotes.filter(n => (n.title || '').toLowerCase().includes(search)).forEach(n => {
+                const div = document.createElement('div');
+                div.className = `p-2 mb-1 rounded cursor-pointer transition-all border-l-2 ${n.id === currentNoteId ? 'border-[var(--neon-cyan)] bg-[var(--neon-cyan)]/10' : 'border-transparent hover:bg-white/5'}`;
+                div.innerHTML = `<div class="font-bold truncate text-xs ${n.id === currentNoteId ? 'text-[var(--neon-cyan)]' : 'text-gray-300'}">${n.title || '未命名'}</div><div class="text-[9px] text-gray-500 font-mono">${new Date(n.timestamp).toLocaleDateString()}</div>`;
+                div.onclick = () => window.loadNote(n.id);
+                list.appendChild(div);
+            });
+        }
+        
+        window.triggerSave = () => {
+            updateSaveStatus('saving');
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(async () => {
+                if (currentNoteId && isOnline) {
+                    const collectionName = currentAppMode === 'novel' ? 'novel_chapters' : 'notes';
+                    await updateDoc(doc(db, 'cyberdeck_users', netrunnerId, collectionName, currentNoteId), {
+                        title: document.getElementById('note-title').value,
+                        content: document.getElementById('editor').innerHTML,
+                        timestamp: Date.now()
+                    });
+                    updateSaveStatus('saved');
+                }
+                window.updateOutline();
+            }, 1000);
+        };
+
+        function updateSaveStatus(status) {
+            const container = document.getElementById('save-status-container');
+            const text = document.getElementById('save-status-text');
+            container.classList.remove('status-saving', 'status-saved');
+            if (status === 'saving') {
+                container.classList.add('status-saving');
+                text.innerText = "UPLOADING...";
+            } else if (status === 'saved') {
+                container.classList.add('status-saved');
+                text.innerText = "SYNCED";
+            } else {
+                text.innerText = "READY";
+            }
+        }
+
+        window.deleteCurrentNote = async () => {
+            if (currentNoteId && confirm('确认删除？')) {
+                const collectionName = currentAppMode === 'novel' ? 'novel_chapters' : 'notes';
+                await deleteDoc(doc(db, 'cyberdeck_users', netrunnerId, collectionName, currentNoteId));
+                currentNoteId = null; document.getElementById('note-title').value = ""; document.getElementById('editor').innerHTML = "";
+            }
         };
 
         window.callAI = async function(mode) {
@@ -520,106 +803,6 @@
                 }
             } catch (e) {
                 contentDiv.innerHTML = `<span class="text-red-500">错误: ${e.message}</span>`;
-            }
-        };
-
-        async function tryInitFirebase(config, id) {
-            try {
-                const app = initializeApp(config);
-                auth = getAuth(app);
-                db = getFirestore(app);
-                netrunnerId = id;
-                try { await enableIndexedDbPersistence(db); } catch (err) {}
-                await signInAnonymously(auth);
-                isOnline = true;
-                updateNetworkStatus('在线', 'status-online');
-                document.getElementById('user-display').innerText = `网际行者: ${netrunnerId}`;
-                initNotesListener();
-                window.switchView('view-home');
-            } catch (e) {
-                console.error("Firebase Init Failed:", e);
-                alert("连接失败: " + e.message);
-                window.switchView('view-setup');
-            }
-        }
-
-        function initNotesListener() {
-            if (!db) return;
-            const notesRef = collection(db, 'cyberdeck_users', netrunnerId, 'notes');
-            const q = query(notesRef, orderBy('timestamp', 'desc'));
-            document.getElementById('sync-indicator').innerHTML = '<i class="fas fa-sync fa-spin text-[var(--neon-pink)]"></i> 同步中';
-            notesUnsubscribe = onSnapshot(q, (snapshot) => {
-                localNotes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderNoteList();
-                if (currentNoteId) {
-                    const current = localNotes.find(n => n.id === currentNoteId);
-                    if (current && document.activeElement.id !== 'editor' && document.activeElement.id !== 'note-title') loadNoteToUI(current);
-                } else if (localNotes.length > 0 && window.location.hash !== '#editor') {
-                    window.loadNote(localNotes[0].id);
-                }
-                document.getElementById('sync-indicator').innerHTML = '<i class="fas fa-circle text-[var(--neon-green)]"></i> 已连接';
-            });
-        }
-
-        window.createNewNote = async () => {
-            if (!isOnline) return alert("需要网络连接。");
-            await addDoc(collection(db, 'cyberdeck_users', netrunnerId, 'notes'), { title: '', content: '', timestamp: Date.now() });
-        };
-        window.loadNote = (id) => { currentNoteId = id; loadNoteToUI(localNotes.find(n => n.id === id)); renderNoteList(); };
-        function loadNoteToUI(note) {
-            if(!note) return;
-            document.getElementById('note-title').value = note.title || '';
-            document.getElementById('editor').innerHTML = note.content || '';
-            window.updateOutline();
-        }
-        function renderNoteList() {
-            const list = document.getElementById('note-list');
-            const search = document.getElementById('search-box').value.toLowerCase();
-            list.innerHTML = '';
-            localNotes.filter(n => (n.title || '').toLowerCase().includes(search)).forEach(n => {
-                const div = document.createElement('div');
-                div.className = `p-2 mb-1 rounded cursor-pointer transition-all border-l-2 ${n.id === currentNoteId ? 'border-[var(--neon-cyan)] bg-[var(--neon-cyan)]/10' : 'border-transparent hover:bg-white/5'}`;
-                div.innerHTML = `<div class="font-bold truncate text-xs ${n.id === currentNoteId ? 'text-[var(--neon-cyan)]' : 'text-gray-300'}">${n.title || '未命名文档'}</div><div class="text-[9px] text-gray-500 font-mono">${new Date(n.timestamp).toLocaleDateString()}</div>`;
-                div.onclick = () => window.loadNote(n.id);
-                list.appendChild(div);
-            });
-        }
-        
-        window.triggerSave = () => {
-            updateSaveStatus('saving');
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(async () => {
-                if (currentNoteId && isOnline) {
-                    await updateDoc(doc(db, 'cyberdeck_users', netrunnerId, 'notes', currentNoteId), {
-                        title: document.getElementById('note-title').value,
-                        content: document.getElementById('editor').innerHTML,
-                        timestamp: Date.now()
-                    });
-                    updateSaveStatus('saved');
-                }
-                window.updateOutline();
-            }, 1000);
-        };
-
-        function updateSaveStatus(status) {
-            const container = document.getElementById('save-status-container');
-            const text = document.getElementById('save-status-text');
-            container.classList.remove('status-saving', 'status-saved');
-            if (status === 'saving') {
-                container.classList.add('status-saving');
-                text.innerText = "UPLOADING...";
-            } else if (status === 'saved') {
-                container.classList.add('status-saved');
-                text.innerText = "SYNCED";
-            } else {
-                text.innerText = "READY";
-            }
-        }
-
-        window.deleteCurrentNote = async () => {
-            if (currentNoteId && confirm('确认删除此文档？')) {
-                await deleteDoc(doc(db, 'cyberdeck_users', netrunnerId, 'notes', currentNoteId));
-                currentNoteId = null; document.getElementById('note-title').value = ""; document.getElementById('editor').innerHTML = "";
             }
         };
 
