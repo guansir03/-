@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberDeck // 纯净终端 [AI+编辑器]</title>
+    <title>CyberDeck // 纯净终端 [编辑器]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Roboto+Mono:wght@300;400;600&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -150,26 +150,61 @@
         .outline-h2 { padding-left: 25px; }
         .outline-h3 { padding-left: 40px; font-size: 0.75rem; opacity: 0.8; }
         
-        #ai-overlay { position: absolute; bottom: 20px; right: 20px; z-index: 200; background: rgba(0,0,0,0.9); border: 1px solid var(--neon-pink); padding: 15px; width: 300px; border-radius: 8px; box-shadow: 0 0 20px rgba(255,0,255,0.2); display: none; font-family: 'Roboto Mono'; }
-        .ai-header { display: flex; justify-content: space-between; color: var(--neon-pink); font-weight: bold; margin-bottom: 10px; font-family: 'Orbitron'; }
-        .ai-content { color: #ddd; font-size: 0.8rem; max-height: 200px; overflow-y: auto; }
-        .ai-loading { animation: pulse 1s infinite; color: var(--neon-cyan); }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-
         /* 图片尺寸选择模态框 */
         #image-size-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-panel); border: 1px solid var(--neon-cyan); padding: 20px; z-index: 1000; box-shadow: 0 0 20px rgba(0, 243, 255, 0.2); display: none; flex-direction: column; gap: 10px; border-radius: 8px; min-width: 200px; }
         #image-size-modal button { background: rgba(0, 243, 255, 0.1); border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 8px 15px; cursor: pointer; transition: all 0.2s; font-family: 'Orbitron'; font-size: 0.8rem; }
         #image-size-modal button:hover { background: var(--neon-cyan); color: white; box-shadow: 0 0 10px var(--neon-cyan); text-shadow: 0 0 5px rgba(0,0,0,0.5); }
         
-        /* 小说卡片编辑模态框 */
-        #card-edit-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(16, 20, 24, 0.98); border: 1px solid var(--neon-purple); padding: 25px; z-index: 1050; box-shadow: 0 0 30px rgba(188, 19, 254, 0.3); display: none; flex-direction: column; gap: 15px; border-radius: 8px; width: 90%; max-width: 500px; backdrop-filter: blur(10px); }
-        #card-edit-modal h3 { font-family: 'Orbitron'; color: var(--neon-purple); margin-bottom: 5px; }
-        #card-edit-modal input, #card-edit-modal textarea, #card-edit-modal select { width: 100%; background: rgba(0,0,0,0.6); border: 1px solid #444; color: white; padding: 10px; font-family: 'Roboto Mono'; margin-bottom: 10px; outline: none; }
-        #card-edit-modal input:focus, #card-edit-modal textarea:focus { border-color: var(--neon-cyan); }
+        /* --- 小说设定卡片 (赛博朋克动画增强版) --- */
+        #card-edit-modal { 
+            position: fixed; top: 50%; left: 50%; 
+            transform: translate(-50%, -45%) scale(0.96); /* 初始状态：稍小且偏移 */
+            background: rgba(16, 20, 24, 0.95); 
+            border: 1px solid var(--neon-purple); 
+            padding: 25px; z-index: 1050; 
+            box-shadow: 0 0 0 rgba(188, 19, 254, 0); /* 初始无发光 */
+            display: none; /* JS控制显隐 */
+            flex-direction: column; gap: 15px; 
+            border-radius: 8px; width: 90%; max-width: 500px; 
+            backdrop-filter: blur(0px); /* 初始无模糊 */
+            opacity: 0; /* 初始透明 */
+            /* 丝滑动画曲线: cubic-bezier(0.19, 1, 0.22, 1) 模拟高级阻尼 */
+            transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.19, 1, 0.22, 1), backdrop-filter 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* 打开状态：类名 .open 控制 */
+        #card-edit-modal.open {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1); /* 完美居中 */
+            backdrop-filter: blur(12px); /* 背景强模糊 */
+            box-shadow: 0 0 40px rgba(188, 19, 254, 0.25), inset 0 0 0 1px rgba(188, 19, 254, 0.2); /* 霓虹呼吸感 */
+        }
+
+        /* 扫描线特效：伪元素 */
+        #card-edit-modal::after {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 15px var(--neon-cyan), 0 0 5px white;
+            opacity: 0; pointer-events: none; z-index: 1051;
+        }
+        /* 只有在打开瞬间播放扫描动画 */
+        #card-edit-modal.open::after {
+            animation: cyber-scan 0.5s ease-out;
+        }
+        @keyframes cyber-scan {
+            0% { top: 0; opacity: 0.8; width: 0%; left: 50%; }
+            20% { width: 100%; left: 0; opacity: 1; }
+            100% { top: 100%; opacity: 0; width: 100%; left: 0; }
+        }
+
+        #card-edit-modal h3 { font-family: 'Orbitron'; color: var(--neon-purple); margin-bottom: 5px; text-shadow: 0 0 5px rgba(188, 19, 254, 0.5); }
+        #card-edit-modal input, #card-edit-modal textarea, #card-edit-modal select { width: 100%; background: rgba(0,0,0,0.6); border: 1px solid #444; color: white; padding: 10px; font-family: 'Roboto Mono'; margin-bottom: 10px; outline: none; transition: border-color 0.3s; }
+        #card-edit-modal input:focus, #card-edit-modal textarea:focus { border-color: var(--neon-cyan); box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
         
         /* 卡片列表样式 */
-        .novel-card { background: rgba(255,255,255,0.03); border: 1px solid transparent; padding: 10px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; border-radius: 4px; }
-        .novel-card:hover { border-color: var(--neon-purple); background: rgba(188, 19, 254, 0.1); transform: translateX(2px); }
+        .novel-card { background: rgba(255,255,255,0.03); border: 1px solid transparent; padding: 10px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; border-radius: 4px; position: relative; overflow: hidden; }
+        .novel-card:hover { border-color: var(--neon-purple); background: rgba(188, 19, 254, 0.1); transform: translateX(4px); box-shadow: -2px 0 10px rgba(188, 19, 254, 0.2); }
         .novel-card-title { font-family: 'Orbitron'; color: #fff; font-size: 0.85rem; margin-bottom: 4px; }
         .novel-card-preview { font-size: 0.7rem; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .novel-card-tag { display: inline-block; font-size: 0.6rem; padding: 2px 6px; border-radius: 2px; margin-right: 5px; text-transform: uppercase; font-weight: bold; }
@@ -207,11 +242,6 @@
                     <textarea id="firebase-config-input" rows="5" placeholder="粘贴 firebaseConfig 对象代码..." class="text-xs font-mono"></textarea>
                 </div>
                 <div class="input-group">
-                    <label>GEMINI API 密钥 <span class="text-[var(--neon-cyan)]">(AI 功能)</span></label>
-                    <input type="password" id="gemini-key-input" placeholder="在此粘贴 API 密钥 (以 AIza 开头)">
-                    <p class="text-[9px] text-gray-500 mt-1">用于启用神经扩写与智能摘要功能</p>
-                </div>
-                <div class="input-group">
                     <label>网际行者 ID (用户名)</label>
                     <input type="text" id="net-id-input" placeholder="如: Ghost_77">
                 </div>
@@ -236,7 +266,7 @@
             <h1 class="text-6xl md:text-8xl font-cyber font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 tracking-tighter mb-2" style="text-shadow: 0 0 30px rgba(0, 243, 255, 0.3);">
                 CYBER<span class="text-[var(--neon-cyan)]">DECK</span>
             </h1>
-            <p class="text-[var(--text-dim)] tracking-[0.5em] text-sm">云端终端 v3.7 [双核驱动版]</p>
+            <p class="text-[var(--text-dim)] tracking-[0.5em] text-sm">欢迎使用赛博笔记</p>
         </div>
         
         <!-- 双模块入口 -->
@@ -297,9 +327,7 @@
             </header>
 
             <div class="editor-toolbar shrink-0">
-                <button class="tool-btn ai-btn" onclick="callAI('expand')" title="AI 智能续写"><i class="fas fa-magic"></i> ✨</button>
-                <button class="tool-btn ai-btn" onclick="callAI('summarize')" title="AI 生成摘要"><i class="fas fa-compress-arrows-alt"></i></button>
-                <button class="tool-btn ai-btn" onclick="callAI('cyberpunk')" title="赛博朋克风润色"><i class="fas fa-robot"></i></button>
+                <!-- 仅保留本地智能高亮功能 -->
                 <button class="tool-btn ai-btn" onclick="applySmartHighlight()" title="智能代码着色"><i class="fas fa-code"></i> 扫描代码</button>
                 <div class="tool-separator"></div>
                 <button class="tool-btn" onclick="formatDoc('undo')" title="撤销"><i class="fas fa-undo"></i></button>
@@ -335,14 +363,6 @@
                 <div id="editor" contenteditable="true" class="w-full max-w-4xl px-8 py-6 text-gray-300 focus:outline-none" placeholder="开始数据传输..."></div>
             </div>
 
-            <div id="ai-overlay">
-                <div class="ai-header">
-                    <span><i class="fas fa-brain"></i> 神经连接响应</span>
-                    <button onclick="document.getElementById('ai-overlay').style.display='none'" class="text-white hover:text-red-500"><i class="fas fa-times"></i></button>
-                </div>
-                <div id="ai-content" class="ai-content"></div>
-            </div>
-
             <!-- 图片尺寸选择模态框 -->
             <div id="image-size-modal">
                 <h3 class="font-cyber text-[var(--neon-cyan)] text-lg mb-4 text-center">选择图片尺寸</h3>
@@ -354,7 +374,7 @@
                 </div>
             </div>
             
-            <!-- 小说设定卡片编辑模态框 -->
+            <!-- 小说设定卡片编辑模态框 (带动画) -->
             <div id="card-edit-modal">
                 <h3 id="card-modal-title">编辑设定卡片</h3>
                 <input type="text" id="card-title-input" placeholder="卡片名称 (如: 主角-K)">
@@ -367,7 +387,7 @@
                 <div class="flex gap-2">
                     <button onclick="saveCardData()" class="flex-1 !bg-[var(--neon-purple)] !text-white hover:!bg-white hover:!text-[var(--neon-purple)]">保存卡片</button>
                     <button onclick="deleteCardData()" id="card-delete-btn" class="!bg-red-900/50 !text-red-400 !border-red-500 hover:!bg-red-600 hover:!text-white">删除</button>
-                    <button onclick="document.getElementById('card-edit-modal').style.display='none'" class="flex-1 !border-gray-500 !text-gray-400">取消</button>
+                    <button onclick="closeCardModal()" class="flex-1 !border-gray-500 !text-gray-400 hover:!text-white">取消</button>
                 </div>
             </div>
         </main>
@@ -565,7 +585,27 @@
             reader.readAsDataURL(file);
         };
 
-        // --- 小说设定卡片逻辑 ---
+        // --- 小说设定卡片逻辑 (带动画) ---
+        
+        // 显示弹窗辅助函数
+        function showCardModal() {
+            const modal = document.getElementById('card-edit-modal');
+            modal.style.display = 'flex';
+            // 强制回流，确保 transition 生效
+            void modal.offsetWidth;
+            modal.classList.add('open');
+        }
+
+        // 隐藏弹窗辅助函数
+        window.closeCardModal = () => {
+            const modal = document.getElementById('card-edit-modal');
+            modal.classList.remove('open');
+            // 等待 CSS transition (0.3s) 结束后再隐藏
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        };
+
         window.openNewCardModal = () => {
             currentCardId = null;
             document.getElementById('card-modal-title').innerText = "新建设定卡片";
@@ -573,7 +613,7 @@
             document.getElementById('card-content-input').value = "";
             document.getElementById('card-type-select').value = "char";
             document.getElementById('card-delete-btn').style.display = "none";
-            document.getElementById('card-edit-modal').style.display = 'flex';
+            showCardModal();
         };
 
         window.openEditCardModal = (cardId) => {
@@ -585,7 +625,7 @@
             document.getElementById('card-content-input').value = card.content || "";
             document.getElementById('card-type-select').value = card.type || "char";
             document.getElementById('card-delete-btn').style.display = "block";
-            document.getElementById('card-edit-modal').style.display = 'flex';
+            showCardModal();
         };
 
         window.saveCardData = async () => {
@@ -605,13 +645,13 @@
                     title, content, type, timestamp: Date.now()
                 });
             }
-            document.getElementById('card-edit-modal').style.display = 'none';
+            closeCardModal();
         };
 
         window.deleteCardData = async () => {
             if (currentCardId && confirm('删除此卡片？')) {
                 await deleteDoc(doc(db, 'cyberdeck_users', netrunnerId, 'novel_cards', currentCardId));
-                document.getElementById('card-edit-modal').style.display = 'none';
+                closeCardModal();
             }
         };
 
@@ -769,54 +809,17 @@
             }
         };
 
-        window.callAI = async function(mode) {
-            const apiKey = localStorage.getItem('cyber_gemini_key');
-            if (!apiKey) { alert("访问拒绝：请在设置中输入 Gemini API 密钥。"); return; }
-            const editor = document.getElementById('editor');
-            const selectedText = window.getSelection().toString();
-            const fullText = editor.innerText;
-            const contextText = selectedText || fullText;
-            if (!contextText.trim()) { alert("没有可处理的数据。"); return; }
-            const overlay = document.getElementById('ai-overlay');
-            const contentDiv = document.getElementById('ai-content');
-            overlay.style.display = 'block';
-            contentDiv.innerHTML = '<div class="ai-loading">连接神经网络中...</div>';
-            let prompt = "";
-            if (mode === 'expand') prompt = `You are a creative writing assistant. Continue the following text naturally in Chinese (or the same language as input):\n\n"${contextText}"`;
-            else if (mode === 'summarize') prompt = `Summarize the following text into concise bullet points in Chinese:\n\n"${contextText}"`;
-            else if (mode === 'cyberpunk') prompt = `Rewrite the following text to sound like a futuristic cyberpunk hacker (using slang like 'choom', 'preem', 'nova', 'eddies' or Chinese equivalents), keep the original meaning, and respond in Chinese:\n\n"${contextText}"`;
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-                const data = await response.json();
-                if (data.error) throw new Error(data.error.message);
-                const resultText = data.candidates[0].content.parts[0].text;
-                if (mode === 'expand') {
-                    document.execCommand('insertText', false, " " + resultText);
-                    contentDiv.innerText = ">> 数据注入成功。";
-                    setTimeout(() => overlay.style.display = 'none', 1500);
-                } else {
-                    contentDiv.innerText = resultText;
-                }
-            } catch (e) {
-                contentDiv.innerHTML = `<span class="text-red-500">错误: ${e.message}</span>`;
-            }
-        };
-
         window.saveConfigAndBoot = () => {
             let configStr = document.getElementById('firebase-config-input').value.trim();
             if (configStr.indexOf('=') > -1) configStr = configStr.split('=')[1].trim();
             if (configStr.endsWith(';')) configStr = configStr.slice(0, -1);
             const netId = document.getElementById('net-id-input').value || "GUEST";
-            const geminiKey = document.getElementById('gemini-key-input').value.trim();
+            
             try {
                 const config = new Function("return " + configStr)();
                 localStorage.setItem('cyber_firebase_config', JSON.stringify(config));
                 localStorage.setItem('cyber_net_id', netId);
-                if(geminiKey) localStorage.setItem('cyber_gemini_key', geminiKey);
+                // 移除 Gemini Key 保存逻辑
                 tryInitFirebase(config, netId);
             } catch (e) { alert("配置解析错误: " + e.message); }
         };
