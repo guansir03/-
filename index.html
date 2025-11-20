@@ -14,27 +14,20 @@
             --neon-purple: #bc13fe;
             --neon-green: #0aff0a;
             --neon-yellow: #fcee0a;
+            --neon-orange: #ffaa00;
             --bg-dark: #050505;
             --bg-panel: rgba(16, 20, 24, 0.95);
-            --text-main: #e0e6ed;
+            --text-main: #ffffff;
         }
 
-        /* --- 核心更新：赛博朋克风格选中态 --- */
-        ::selection {
-            background: var(--neon-pink);
-            color: #000; /* 黑色文字形成极高反差 */
-            text-shadow: 0 0 5px rgba(255, 0, 255, 0.5);
-        }
-        ::-moz-selection {
-            background: var(--neon-pink);
-            color: #000;
-            text-shadow: 0 0 5px rgba(255, 0, 255, 0.5);
-        }
+        /* --- 选区样式 --- */
+        ::selection { background: var(--neon-pink); color: #ffffff; text-shadow: 0 0 5px rgba(255,255,255,0.9); }
+        ::-moz-selection { background: var(--neon-pink); color: #ffffff; text-shadow: 0 0 5px rgba(255,255,255,0.9); }
 
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
-            font-family: 'Roboto Mono', 'Noto Sans SC', 'Microsoft YaHei', sans-serif; /* 全局默认字体优化 */
+            font-family: 'Roboto Mono', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
             overflow: hidden;
             margin: 0;
             height: 100vh;
@@ -42,7 +35,6 @@
         }
 
         #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-        
         .scanlines {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
@@ -71,40 +63,25 @@
         
         .font-cyber { font-family: 'Orbitron', sans-serif; }
 
-        .view-section {
-            display: none; height: 100%; width: 100%;
-            animation: fadeIn 0.4s ease-in-out; position: relative; z-index: 10;
-        }
+        .view-section { display: none; height: 100%; width: 100%; animation: fadeIn 0.4s ease-in-out; position: relative; z-index: 10; }
         .view-section.active { display: flex; }
-
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        .hub-card {
-            transition: all 0.3s; cursor: pointer;
-            background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.2) 100%);
-        }
-        .hub-card:hover {
-            transform: translateY(-5px); box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
-            border-color: var(--neon-cyan);
-        }
+        .hub-card { transition: all 0.3s; cursor: pointer; background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.2) 100%); }
+        .hub-card:hover { transform: translateY(-5px); box-shadow: 0 0 20px rgba(0, 243, 255, 0.2); border-color: var(--neon-cyan); }
 
-        /* 设置界面样式 */
+        /* 界面元素 */
         .input-group label { display: block; color: var(--neon-cyan); font-size: 0.8rem; margin-bottom: 0.5rem; font-family: 'Orbitron'; }
         .input-group input, .input-group textarea {
             width: 100%; background: rgba(0,0,0,0.5); border: 1px solid #333;
-            color: white; padding: 0.8rem; font-family: 'Roboto Mono';
-            transition: border-color 0.3s;
+            color: white; padding: 0.8rem; font-family: 'Roboto Mono'; transition: border-color 0.3s;
         }
         .input-group input:focus, .input-group textarea:focus { outline: none; border-color: var(--neon-pink); }
         
-        .status-dot {
-            width: 8px; height: 8px; border-radius: 50%; display: inline-block;
-            margin-right: 6px; box-shadow: 0 0 5px currentColor;
-        }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; box-shadow: 0 0 5px currentColor; }
         .status-online { color: var(--neon-green); background: var(--neon-green); }
         .status-offline { color: var(--neon-red); background: var(--neon-red); }
         
-        /* --- 编辑器增强样式 --- */
         .editor-toolbar {
             display: flex; gap: 0.4rem; padding: 0.6rem 1rem;
             background: rgba(0,0,0,0.5); border-bottom: 1px solid #333;
@@ -118,126 +95,87 @@
         .tool-btn:hover { color: var(--neon-cyan); background: rgba(0, 243, 255, 0.15); border-color: rgba(0, 243, 255, 0.3); }
         .tool-btn.active { color: var(--neon-pink); background: rgba(255, 0, 255, 0.15); border-color: rgba(255, 0, 255, 0.3); }
         
-        /* AI Button Specifics */
         .ai-btn { color: var(--neon-pink); border: 1px solid rgba(255, 0, 255, 0.3); }
         .ai-btn:hover { background: rgba(255, 0, 255, 0.2); color: white; box-shadow: 0 0 10px var(--neon-pink); }
-
         .tool-separator { width: 1px; height: 20px; background: #4b5563; margin: 0 0.3rem; }
         
-        /* 编辑器内部排版 - 升级版 (需求1: 字体优化) */
+        /* --- 编辑器核心样式 --- */
         #editor {
-            line-height: 1.8;
-            padding-bottom: 100px;
-            caret-color: var(--neon-pink);
-            /* 强制使用等宽字体+无衬线字体组合，确保中文显示为黑体而非宋体 */
+            line-height: 1.8; padding-bottom: 100px; caret-color: var(--neon-pink);
             font-family: 'Roboto Mono', 'Noto Sans SC', 'Microsoft YaHei', 'Heiti SC', sans-serif;
+            color: #ffffff;
+            white-space: pre-wrap;
+            text-shadow: 0 0 2px rgba(255,255,255,0.2);
+        }
+
+        #editor * { 
+            color: inherit !important; 
+            background-color: transparent !important; 
         }
         
-        /* --- 标题美化 --- */
+        /* 关键修复：消除内部段落的默认间距，解决Word粘贴空行问题 */
+        #editor p, #editor div {
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* --- 智能代码高亮样式 --- */
+        #editor .cyber-keyword { color: var(--neon-pink) !important; font-weight: bold; text-shadow: 0 0 10px var(--neon-pink); }
+        #editor .cyber-string { color: var(--neon-cyan) !important; text-shadow: 0 0 10px var(--neon-cyan); }
+        #editor .cyber-comment { color: var(--neon-green) !important; font-style: italic; text-shadow: 0 0 10px var(--neon-green); opacity: 0.8; }
+        #editor .cyber-number { color: var(--neon-yellow) !important; text-shadow: 0 0 10px var(--neon-yellow); }
+        #editor .cyber-macro { color: var(--neon-purple) !important; font-weight: bold; text-shadow: 0 0 10px var(--neon-purple); }
+        #editor .cyber-type { color: var(--neon-orange) !important; text-shadow: 0 0 10px var(--neon-orange); }
+
+        /* 排版美化 */
         #editor h1 { 
-            font-size: 2.2em; font-weight: 900; 
-            color: transparent; background: linear-gradient(90deg, var(--neon-cyan), #fff, var(--neon-cyan));
-            background-clip: text; -webkit-background-clip: text;
-            margin: 1em 0 0.5em; padding-bottom: 0.3em;
-            border-bottom: 2px solid var(--neon-cyan); position: relative;
-            font-family: 'Orbitron', sans-serif; text-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+            font-size: 2.2em; font-weight: 900; color: transparent; 
+            background: linear-gradient(90deg, var(--neon-cyan), #fff, var(--neon-cyan));
+            background-clip: text; -webkit-background-clip: text; margin: 1em 0 0.5em; padding-bottom: 0.3em;
+            border-bottom: 2px solid var(--neon-cyan); position: relative; font-family: 'Orbitron', sans-serif;
         }
         #editor h1::after { content: ' // HEADER_01'; font-size: 0.4em; color: var(--neon-cyan); position: absolute; bottom: 2px; right: 0; opacity: 0.6; letter-spacing: 2px; }
-
-        #editor h2 { 
-            font-size: 1.6em; font-weight: bold; color: var(--neon-pink); 
-            margin: 0.8em 0 0.4em; padding-left: 15px;
-            border-left: 4px solid var(--neon-pink);
-            background: linear-gradient(90deg, rgba(255,0,255,0.1), transparent);
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        #editor h3 { 
-            font-size: 1.25em; font-weight: bold; color: var(--neon-purple); 
-            margin: 0.8em 0 0.4em; text-transform: uppercase; letter-spacing: 1px;
-            display: flex; align-items: center;
-        }
+        #editor h2 { font-size: 1.6em; font-weight: bold; color: var(--neon-pink); margin: 0.8em 0 0.4em; padding-left: 15px; border-left: 4px solid var(--neon-pink); background: linear-gradient(90deg, rgba(255,0,255,0.1), transparent); font-family: 'Orbitron', sans-serif; }
+        #editor h3 { font-size: 1.25em; font-weight: bold; color: var(--neon-purple); margin: 0.8em 0 0.4em; text-transform: uppercase; display: flex; align-items: center; }
         #editor h3::before { content: '>>'; margin-right: 8px; color: var(--neon-green); font-size: 0.8em; }
-
         #editor blockquote { border-left: 4px solid var(--neon-cyan); padding-left: 1em; margin: 1em 0; color: #94a3b8; font-style: italic; background: rgba(0, 243, 255, 0.05); padding: 10px; }
         #editor ul { list-style-type: disc; padding-left: 1.5em; margin: 0.5em 0; }
         #editor ol { list-style-type: decimal; padding-left: 1.5em; margin: 0.5em 0; }
         #editor li { margin-bottom: 0.2em; }
         #editor hr { border: 0; border-top: 1px dashed #4b5563; margin: 2em 0; }
-        
-        /* --- 图片优化 --- */
-        #editor img { 
-            max-width: 100%; border: 1px solid var(--neon-pink); border-radius: 4px; margin: 10px 0; 
-            box-shadow: 0 0 10px rgba(255,0,255,0.1); height: auto; display: inline-block; vertical-align: bottom;
-        }
+        #editor img { max-width: 100%; border: 1px solid var(--neon-pink); border-radius: 4px; margin: 10px 0; box-shadow: 0 0 10px rgba(255,0,255,0.1); height: auto; display: inline-block; vertical-align: bottom; }
         #editor img.size-small { width: 25%; min-width: 150px; }
         #editor img.size-medium { width: 50%; min-width: 300px; }
         #editor img.size-large { width: 75%; min-width: 450px; }
 
-        /* 大纲索引样式 */
-        .outline-item {
-            padding: 4px 8px; cursor: pointer; font-size: 0.8rem;
-            color: #9ca3af; transition: all 0.2s; border-left: 2px solid transparent;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
+        .outline-item { padding: 4px 8px; cursor: pointer; font-size: 0.8rem; color: #9ca3af; transition: all 0.2s; border-left: 2px solid transparent; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .outline-item:hover { color: var(--neon-cyan); background: rgba(255,255,255,0.05); }
         .outline-h1 { padding-left: 10px; font-weight: bold; color: #e0e6ed; }
         .outline-h2 { padding-left: 25px; }
         .outline-h3 { padding-left: 40px; font-size: 0.75rem; opacity: 0.8; }
         
-        /* AI Overlay */
-        #ai-overlay {
-            position: absolute; bottom: 20px; right: 20px; z-index: 200;
-            background: rgba(0,0,0,0.9); border: 1px solid var(--neon-pink);
-            padding: 15px; width: 300px; border-radius: 8px;
-            box-shadow: 0 0 20px rgba(255,0,255,0.2);
-            display: none; font-family: 'Roboto Mono';
-        }
+        #ai-overlay { position: absolute; bottom: 20px; right: 20px; z-index: 200; background: rgba(0,0,0,0.9); border: 1px solid var(--neon-pink); padding: 15px; width: 300px; border-radius: 8px; box-shadow: 0 0 20px rgba(255,0,255,0.2); display: none; font-family: 'Roboto Mono'; }
         .ai-header { display: flex; justify-content: space-between; color: var(--neon-pink); font-weight: bold; margin-bottom: 10px; font-family: 'Orbitron'; }
         .ai-content { color: #ddd; font-size: 0.8rem; max-height: 200px; overflow-y: auto; }
         .ai-loading { animation: pulse 1s infinite; color: var(--neon-cyan); }
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
-        /* 图片尺寸选择浮窗 */
-        #image-size-modal {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: var(--bg-panel); border: 1px solid var(--neon-cyan);
-            padding: 20px; z-index: 1000; box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
-            display: none; flex-direction: column; gap: 10px;
-            border-radius: 8px; min-width: 200px;
-        }
-        #image-size-modal button {
-            background: rgba(0, 243, 255, 0.1); border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
-            padding: 8px 15px; cursor: pointer; transition: all 0.2s; font-family: 'Orbitron'; font-size: 0.8rem;
-        }
-        #image-size-modal button:hover { background: var(--neon-cyan); color: black; box-shadow: 0 0 10px var(--neon-cyan); }
+        #image-size-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-panel); border: 1px solid var(--neon-cyan); padding: 20px; z-index: 1000; box-shadow: 0 0 20px rgba(0, 243, 255, 0.2); display: none; flex-direction: column; gap: 10px; border-radius: 8px; min-width: 200px; }
+        #image-size-modal button { background: rgba(0, 243, 255, 0.1); border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 8px 15px; cursor: pointer; transition: all 0.2s; font-family: 'Orbitron'; font-size: 0.8rem; }
+        #image-size-modal button:hover { background: var(--neon-cyan); color: white; box-shadow: 0 0 10px var(--neon-cyan); text-shadow: 0 0 5px rgba(0,0,0,0.5); }
         
-        /* --- 赛博打字粒子特效 --- */
-        .type-particle {
-            position: fixed; pointer-events: none; font-size: 12px; font-family: 'Courier New', monospace;
-            animation: particle-fade 0.8s forwards ease-out; font-weight: bold; z-index: 9999;
-        }
+        .type-particle { position: fixed; pointer-events: none; font-size: 12px; font-family: 'Courier New', monospace; animation: particle-fade 0.8s forwards ease-out; font-weight: bold; z-index: 9999; }
         @keyframes particle-fade { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-20px) scale(0.5); opacity: 0; } }
 
-        /* --- 保存状态指示器美化 (需求2) --- */
-        #save-status-container {
-            display: flex; align-items: center; gap: 6px; font-family: 'Orbitron', sans-serif; font-size: 0.75rem;
-            padding: 2px 8px; border-radius: 4px; transition: all 0.3s;
-        }
+        #save-status-container { display: flex; align-items: center; gap: 6px; font-family: 'Orbitron', sans-serif; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; transition: all 0.3s; }
         .save-status-icon { width: 6px; height: 6px; background: #555; border-radius: 50%; box-shadow: 0 0 5px #555; transition: all 0.3s; }
-        
-        /* 状态：保存中 */
         .status-saving .save-status-icon { background: var(--neon-yellow); box-shadow: 0 0 8px var(--neon-yellow); animation: blink 0.5s infinite alternate; }
         .status-saving { color: var(--neon-yellow); text-shadow: 0 0 5px rgba(252, 238, 10, 0.5); }
-        
-        /* 状态：已保存 */
         .status-saved .save-status-icon { background: var(--neon-cyan); box-shadow: 0 0 8px var(--neon-cyan); }
         .status-saved { color: var(--neon-cyan); text-shadow: 0 0 5px rgba(0, 243, 255, 0.5); }
-
         @keyframes blink { from { opacity: 0.4; } to { opacity: 1; } }
 
-        /* 占位符 */
-        [contenteditable]:empty:before { content: attr(placeholder); color: #555; display: block; }
+        [contenteditable]:empty:before { content: attr(placeholder); color: #888; display: block; }
     </style>
 </head>
 <body>
@@ -245,7 +183,7 @@
     <canvas id="bg-canvas"></canvas>
     <div class="scanlines"></div>
 
-    <!-- ==================== 视图 0: 初始化设置 (SETUP) ==================== -->
+    <!-- View Setup -->
     <div id="view-setup" class="view-section flex-col items-center justify-center p-8 z-50">
         <div class="cyber-panel p-8 rounded-xl max-w-lg w-full border border-[var(--neon-pink)]">
             <h2 class="text-2xl font-cyber text-[var(--neon-pink)] mb-2 text-center">SYSTEM INITIALIZATION</h2>
@@ -264,7 +202,7 @@
                     <label>网际行者 ID (用户名)</label>
                     <input type="text" id="net-id-input" placeholder="如: Ghost_77">
                 </div>
-                <button onclick="saveConfigAndBoot()" class="w-full bg-[var(--neon-pink)] text-black font-bold py-3 mt-4 font-cyber hover:bg-white transition-colors">
+                <button onclick="saveConfigAndBoot()" class="w-full bg-[var(--neon-pink)] text-white font-bold py-3 mt-4 font-cyber hover:bg-white hover:text-[var(--neon-pink)] transition-colors">
                     ESTABLISH UPLINK [建立连接]
                 </button>
                 <button onclick="bootOffline()" class="w-full border border-gray-600 text-gray-500 py-2 mt-2 text-xs hover:text-white hover:border-white transition-colors">
@@ -274,7 +212,7 @@
         </div>
     </div>
 
-    <!-- ==================== 视图 1: 主控中心 (HOME) ==================== -->
+    <!-- View Home -->
     <div id="view-home" class="view-section flex-col items-center justify-center p-8 relative">
         <div class="absolute top-4 left-4 font-mono text-xs text-gray-500 flex items-center gap-4">
             <div id="network-status"><span class="status-dot status-offline"></span>离线</div>
@@ -287,8 +225,6 @@
             </h1>
             <p class="text-[var(--text-dim)] tracking-[0.5em] text-sm">云端终端 v3.6 [纯净聚焦版]</p>
         </div>
-        
-        <!-- 单一核心卡片布局 -->
         <div class="flex justify-center w-full">
             <div onclick="window.switchView('view-notes')" class="hub-card cyber-panel p-10 rounded-xl border border-gray-700 flex flex-col items-center text-center group corner-decor w-full max-w-md">
                 <div class="w-24 h-24 rounded-full bg-black/50 border border-gray-600 flex items-center justify-center mb-6 group-hover:border-[var(--neon-cyan)] transition-colors">
@@ -300,19 +236,17 @@
         </div>
     </div>
 
-    <!-- ==================== 视图 2: 笔记应用 (NOTES) ==================== -->
+    <!-- View Notes -->
     <div id="view-notes" class="view-section flex-col md:flex-row p-4 md:p-6 gap-4 max-w-[1800px] mx-auto w-full h-full relative">
-        
-        <!-- 左侧：文件列表 -->
         <aside class="w-full md:w-[18%] min-w-[200px] cyber-panel flex flex-col rounded-lg overflow-hidden h-[20%] md:h-full border-r border-gray-800">
             <div class="p-3 border-b border-gray-800 bg-black/40 flex justify-between items-center">
-                <button onclick="window.switchView('view-home')" class="text-[10px] border border-[var(--neon-cyan)] text-[var(--neon-cyan)] px-2 py-1 hover:bg-[var(--neon-cyan)] hover:text-black transition-colors">
+                <button onclick="window.switchView('view-home')" class="text-[10px] border border-[var(--neon-cyan)] text-[var(--neon-cyan)] px-2 py-1 hover:bg-[var(--neon-cyan)] hover:text-white transition-colors">
                     <i class="fas fa-chevron-left"></i> 主页
                 </button>
                 <h2 class="text-sm font-cyber font-bold text-gray-400">文件列表</h2>
             </div>
             <div class="p-2 bg-black/20">
-                <button onclick="createNewNote()" class="w-full border border-[var(--neon-cyan)] text-[var(--neon-cyan)] py-1.5 text-xs font-bold hover:bg-[var(--neon-cyan)] hover:text-black transition-colors mb-2">
+                <button onclick="createNewNote()" class="w-full border border-[var(--neon-cyan)] text-[var(--neon-cyan)] py-1.5 text-xs font-bold hover:bg-[var(--neon-cyan)] hover:text-white transition-colors mb-2">
                     + 新建文档
                 </button>
                 <input type="text" id="search-box" placeholder="搜索..." class="w-full bg-black/50 border border-gray-700 text-white text-xs rounded p-1.5 focus:border-[var(--neon-cyan)] focus:outline-none">
@@ -321,13 +255,10 @@
             <div class="p-2 text-[10px] text-gray-600 text-center border-t border-gray-800" id="sync-indicator">同步就绪</div>
         </aside>
 
-        <!-- 中间：编辑器 -->
         <main class="flex-1 cyber-panel flex flex-col rounded-lg overflow-hidden relative h-[60%] md:h-full shadow-2xl">
-            
             <header class="h-12 border-b border-gray-700 bg-black/60 flex items-center justify-between px-4 shrink-0">
                 <input type="text" id="note-title" placeholder="未命名文档" class="bg-transparent border-none text-lg font-bold text-[var(--neon-cyan)] focus:outline-none w-2/3 font-cyber">
                 <div class="flex items-center gap-3">
-                    <!-- 升级后的保存状态指示器 -->
                     <div id="save-status-container">
                         <div class="save-status-icon"></div>
                         <span id="save-status-text">READY</span>
@@ -336,52 +267,39 @@
                 </div>
             </header>
 
-            <!-- Word 级工具栏 + AI 工具 (混合) -->
             <div class="editor-toolbar shrink-0">
-                <!-- AI Tools -->
                 <button class="tool-btn ai-btn" onclick="callAI('expand')" title="AI 智能续写"><i class="fas fa-magic"></i> ✨</button>
                 <button class="tool-btn ai-btn" onclick="callAI('summarize')" title="AI 生成摘要"><i class="fas fa-compress-arrows-alt"></i></button>
                 <button class="tool-btn ai-btn" onclick="callAI('cyberpunk')" title="赛博朋克风润色"><i class="fas fa-robot"></i></button>
+                <!-- 智能高亮按钮 -->
+                <button class="tool-btn ai-btn" onclick="applySmartHighlight()" title="智能代码着色"><i class="fas fa-code"></i> 扫描代码</button>
                 <div class="tool-separator"></div>
-
-                <!-- History -->
                 <button class="tool-btn" onclick="formatDoc('undo')" title="撤销"><i class="fas fa-undo"></i></button>
                 <button class="tool-btn" onclick="formatDoc('redo')" title="重做"><i class="fas fa-redo"></i></button>
                 <div class="tool-separator"></div>
-                
-                <!-- Format -->
                 <button class="tool-btn font-bold" onclick="formatDoc('bold')" title="加粗">B</button>
                 <button class="tool-btn italic" onclick="formatDoc('italic')" title="斜体">I</button>
                 <button class="tool-btn underline" onclick="formatDoc('underline')" title="下划线">U</button>
                 <button class="tool-btn line-through" onclick="formatDoc('strikeThrough')" title="删除线">S</button>
                 <div class="tool-separator"></div>
-
-                <!-- Headings -->
                 <button class="tool-btn" onclick="formatDoc('formatBlock', 'H1')" title="标题 1"><span class="font-bold text-lg">H1</span></button>
                 <button class="tool-btn" onclick="formatDoc('formatBlock', 'H2')" title="标题 2"><span class="font-bold text-base">H2</span></button>
                 <button class="tool-btn" onclick="formatDoc('formatBlock', 'H3')" title="标题 3"><span class="font-bold text-sm">H3</span></button>
                 <button class="tool-btn" onclick="formatDoc('formatBlock', 'P')" title="段落"><i class="fas fa-paragraph"></i></button>
                 <div class="tool-separator"></div>
-
-                <!-- Align -->
                 <button class="tool-btn" onclick="formatDoc('justifyLeft')" title="左对齐"><i class="fas fa-align-left"></i></button>
                 <button class="tool-btn" onclick="formatDoc('justifyCenter')" title="居中"><i class="fas fa-align-center"></i></button>
                 <button class="tool-btn" onclick="formatDoc('justifyRight')" title="右对齐"><i class="fas fa-align-right"></i></button>
                 <div class="tool-separator"></div>
-
-                <!-- Lists & Indent -->
                 <button class="tool-btn" onclick="formatDoc('insertUnorderedList')" title="无序列表"><i class="fas fa-list-ul"></i></button>
                 <button class="tool-btn" onclick="formatDoc('insertOrderedList')" title="有序列表"><i class="fas fa-list-ol"></i></button>
                 <button class="tool-btn" onclick="formatDoc('indent')" title="增加缩进"><i class="fas fa-indent"></i></button>
                 <button class="tool-btn" onclick="formatDoc('outdent')" title="减少缩进"><i class="fas fa-outdent"></i></button>
                 <button class="tool-btn" onclick="formatDoc('formatBlock', 'blockquote')" title="引用"><i class="fas fa-quote-right"></i></button>
                 <div class="tool-separator"></div>
-
-                <!-- Insert -->
                 <button class="tool-btn" onclick="formatDoc('insertHorizontalRule')" title="分割线">HR</button>
                 <button class="tool-btn" onclick="openImageUpload()" title="插入图片"><i class="fas fa-image"></i></button>
                 <button class="tool-btn text-red-400" onclick="formatDoc('removeFormat')" title="清除格式"><i class="fas fa-eraser"></i></button>
-                
                 <input type="file" id="img-up" accept="image/*" class="hidden">
             </div>
 
@@ -389,7 +307,6 @@
                 <div id="editor" contenteditable="true" class="w-full max-w-4xl px-8 py-6 text-gray-300 focus:outline-none" placeholder="开始数据传输..."></div>
             </div>
 
-            <!-- AI 结果悬浮窗 -->
             <div id="ai-overlay">
                 <div class="ai-header">
                     <span><i class="fas fa-brain"></i> 神经连接响应</span>
@@ -398,7 +315,6 @@
                 <div id="ai-content" class="ai-content"></div>
             </div>
 
-            <!-- 图片尺寸选择浮窗 -->
             <div id="image-size-modal">
                 <h3 class="font-cyber text-[var(--neon-cyan)] text-lg mb-4 text-center">选择图片尺寸</h3>
                 <div class="flex flex-col gap-2">
@@ -410,7 +326,6 @@
             </div>
         </main>
 
-        <!-- 右侧：大纲 -->
         <aside class="w-full md:w-[17%] min-w-[180px] cyber-panel flex flex-col rounded-lg overflow-hidden h-[20%] md:h-full border-l border-gray-800 hidden md:flex">
             <div class="p-3 border-b border-gray-800 bg-black/40">
                 <h2 class="text-xs font-cyber font-bold text-[var(--neon-pink)]">NEURAL LINK</h2>
@@ -420,14 +335,13 @@
         </aside>
     </div>
 
-    <!-- SCRIPTS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
         import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
         let db, auth, notesUnsubscribe, localNotes = [], currentNoteId = null, isOnline = false, netrunnerId = "GUEST", saveTimeout;
-        window.pendingImageFile = null; // 暴露给全局以便其他函数访问
+        window.pendingImageFile = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             const storedConfig = localStorage.getItem('cyber_firebase_config');
@@ -439,10 +353,8 @@
             }
         });
 
-        // --- Editor & Formatting ---
         window.formatDoc = (cmd, value) => { document.execCommand(cmd, false, value); document.getElementById('editor').focus(); window.triggerSave(); };
         
-        // --- Tab键支持 ---
         document.getElementById('editor').addEventListener('keydown', function(e) {
             if (e.key === 'Tab') {
                 e.preventDefault();
@@ -450,9 +362,64 @@
             }
         });
 
-        // --- 赛博打字粒子特效 ---
+        // --- 解决 Word 粘贴空行问题的核心逻辑 ---
+        document.getElementById('editor').addEventListener('paste', function(e) {
+            e.preventDefault(); // 阻止默认粘贴
+            // 获取纯文本，这将去除 Word 的所有富文本格式（包括导致空行的 <p> 标签）
+            let text = (e.clipboardData || window.clipboardData).getData('text/plain');
+            // 可选：在这里进一步清洗 text，比如 text = text.replace(/\r\n/g, '\n');
+            document.execCommand('insertText', false, text);
+            window.triggerSave();
+        });
+
+        // --- 智能高亮引擎 (单次扫描) ---
+        window.applySmartHighlight = function() {
+            const editor = document.getElementById('editor');
+            const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, null, false);
+            const textNodes = [];
+            while(walker.nextNode()) textNodes.push(walker.currentNode);
+
+            textNodes.forEach(node => {
+                if (node.parentNode.className && typeof node.parentNode.className === 'string' && node.parentNode.className.includes('cyber-')) return;
+                
+                let text = node.nodeValue;
+                const isCodeLike = /[{};#]|\/\/|\b(int|void|if|return|include)\b/.test(text);
+                
+                if (isCodeLike && text.trim().length > 0) {
+                    let safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    const regex = /(\/\/.*)|(".*?"|&lt;.*?&gt;)|(#\w+)|(\b(?:int|void|char|float|double|struct|class|const|static|volatile|unsigned|signed|if|else|while|for|switch|case|break|default|return|typedef|extern)\b)|(\b\d+|0x[0-9a-fA-F]+\b)|(\b[A-Z_][A-Z0-9_]*\b)/g;
+
+                    let newHtml = safeText.replace(regex, function(match, comment, string, macro, keyword, number, type) {
+                        if (comment) return `<span class="cyber-comment">${comment}</span>`;
+                        if (string) return `<span class="cyber-string">${string}</span>`;
+                        if (macro) return `<span class="cyber-macro">${macro}</span>`;
+                        if (keyword) return `<span class="cyber-keyword">${keyword}</span>`;
+                        if (number) return `<span class="cyber-number">${number}</span>`;
+                        if (type) return `<span class="cyber-type">${type}</span>`;
+                        return match;
+                    });
+
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = newHtml;
+                    
+                    const parent = node.parentNode;
+                    while (tempDiv.firstChild) {
+                        parent.insertBefore(tempDiv.firstChild, node);
+                    }
+                    parent.removeChild(node);
+                }
+            });
+            
+            window.triggerSave();
+        };
+
+        // --- 输入与打字特效 ---
         const particleColors = ['#00f3ff', '#ff00ff', '#bc13fe', '#0aff0a'];
         document.getElementById('editor').addEventListener('input', function(e) {
+            if (e.inputType === 'insertFromPaste') {
+                // 粘贴时由 paste 事件处理，这里忽略
+                return;
+            }
             const selection = window.getSelection();
             if(selection.rangeCount > 0) {
                 const range = selection.getRangeAt(0);
@@ -492,7 +459,6 @@
             });
         };
 
-        // --- Image Upload Logic ---
         window.openImageUpload = () => {
             document.getElementById('img-up').click();
         };
@@ -508,7 +474,6 @@
         window.insertImageWithSize = (sizeClass) => {
             const file = window.pendingImageFile;
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 const imgHtml = `<img src="${e.target.result}" class="${sizeClass}"><br>`;
@@ -521,40 +486,31 @@
             reader.readAsDataURL(file);
         };
 
-        // --- AI Logic (Gemini) ---
         window.callAI = async function(mode) {
             const apiKey = localStorage.getItem('cyber_gemini_key');
             if (!apiKey) { alert("访问拒绝：请在设置中输入 Gemini API 密钥。"); return; }
-
             const editor = document.getElementById('editor');
             const selectedText = window.getSelection().toString();
             const fullText = editor.innerText;
             const contextText = selectedText || fullText;
-
             if (!contextText.trim()) { alert("没有可处理的数据。"); return; }
-
             const overlay = document.getElementById('ai-overlay');
             const contentDiv = document.getElementById('ai-content');
             overlay.style.display = 'block';
             contentDiv.innerHTML = '<div class="ai-loading">连接神经网络中...</div>';
-
             let prompt = "";
             if (mode === 'expand') prompt = `You are a creative writing assistant. Continue the following text naturally in Chinese (or the same language as input):\n\n"${contextText}"`;
             else if (mode === 'summarize') prompt = `Summarize the following text into concise bullet points in Chinese:\n\n"${contextText}"`;
             else if (mode === 'cyberpunk') prompt = `Rewrite the following text to sound like a futuristic cyberpunk hacker (using slang like 'choom', 'preem', 'nova', 'eddies' or Chinese equivalents), keep the original meaning, and respond in Chinese:\n\n"${contextText}"`;
-
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
-                
                 const data = await response.json();
                 if (data.error) throw new Error(data.error.message);
-                
                 const resultText = data.candidates[0].content.parts[0].text;
-                
                 if (mode === 'expand') {
                     document.execCommand('insertText', false, " " + resultText);
                     contentDiv.innerText = ">> 数据注入成功。";
@@ -567,7 +523,6 @@
             }
         };
 
-        // --- Firebase Logic ---
         async function tryInitFirebase(config, id) {
             try {
                 const app = initializeApp(config);
@@ -593,7 +548,6 @@
             const notesRef = collection(db, 'cyberdeck_users', netrunnerId, 'notes');
             const q = query(notesRef, orderBy('timestamp', 'desc'));
             document.getElementById('sync-indicator').innerHTML = '<i class="fas fa-sync fa-spin text-[var(--neon-pink)]"></i> 同步中';
-
             notesUnsubscribe = onSnapshot(q, (snapshot) => {
                 localNotes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderNoteList();
@@ -607,7 +561,6 @@
             });
         }
 
-        // --- Note CRUD ---
         window.createNewNote = async () => {
             if (!isOnline) return alert("需要网络连接。");
             await addDoc(collection(db, 'cyberdeck_users', netrunnerId, 'notes'), { title: '', content: '', timestamp: Date.now() });
@@ -632,7 +585,6 @@
             });
         }
         
-        // --- 保存状态逻辑更新 (需求2) ---
         window.triggerSave = () => {
             updateSaveStatus('saving');
             clearTimeout(saveTimeout);
@@ -652,10 +604,7 @@
         function updateSaveStatus(status) {
             const container = document.getElementById('save-status-container');
             const text = document.getElementById('save-status-text');
-            
-            // 重置类
             container.classList.remove('status-saving', 'status-saved');
-            
             if (status === 'saving') {
                 container.classList.add('status-saving');
                 text.innerText = "UPLOADING...";
@@ -674,7 +623,6 @@
             }
         };
 
-        // --- Config ---
         window.saveConfigAndBoot = () => {
             let configStr = document.getElementById('firebase-config-input').value.trim();
             if (configStr.indexOf('=') > -1) configStr = configStr.split('=')[1].trim();
@@ -697,7 +645,6 @@
         document.getElementById('note-title').addEventListener('input', window.triggerSave);
         document.getElementById('search-box').addEventListener('input', renderNoteList);
 
-        // --- Background ---
         (function() { const c=document.getElementById('bg-canvas'), x=c.getContext('2d'); let w,h,p=[]; const r=()=>{w=c.width=window.innerWidth;h=c.height=window.innerHeight}; window.addEventListener('resize',r); r(); class P{constructor(){this.reset()}reset(){this.x=Math.random()*w;this.y=Math.random()*h;this.vx=(Math.random()-.5)*.5;this.vy=(Math.random()-.5)*.5;this.color=Math.random()>.5?'#00f3ff':'#bc13fe'}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>w||this.y<0||this.y>h)this.reset()}draw(){x.globalAlpha=0.3;x.fillStyle=this.color;x.beginPath();x.arc(this.x,this.y,1,0,Math.PI*2);x.fill()}} for(let i=0;i<80;i++)p.push(new P()); function a(){x.clearRect(0,0,w,h);x.strokeStyle='rgba(0,243,255,0.02)';x.lineWidth=1;for(let i=0;i<w;i+=60){x.beginPath();x.moveTo(i,0);x.lineTo(i,h);x.stroke()}p.forEach(i=>{i.update();i.draw()});requestAnimationFrame(a)} a(); })();
     </script>
 </body>
