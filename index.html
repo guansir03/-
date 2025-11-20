@@ -241,6 +241,7 @@
                     <label>FIREBASE 配置 (JSON)</label>
                     <textarea id="firebase-config-input" rows="5" placeholder="粘贴 firebaseConfig 对象代码..." class="text-xs font-mono"></textarea>
                 </div>
+                <!-- Removed Gemini API Key Input since AI features are disabled -->
                 <div class="input-group">
                     <label>网际行者 ID (用户名)</label>
                     <input type="text" id="net-id-input" placeholder="如: Ghost_77">
@@ -266,7 +267,7 @@
             <h1 class="text-6xl md:text-8xl font-cyber font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 tracking-tighter mb-2" style="text-shadow: 0 0 30px rgba(0, 243, 255, 0.3);">
                 CYBER<span class="text-[var(--neon-cyan)]">DECK</span>
             </h1>
-            <p class="text-[var(--text-dim)] tracking-[0.5em] text-sm">欢迎使用赛博笔记</p>
+            <p class="text-[var(--text-dim)] tracking-[0.5em] text-sm">云 端 终 端 已 接 入</p>
         </div>
         
         <!-- 双模块入口 -->
@@ -427,6 +428,29 @@
                 tryInitFirebase(JSON.parse(storedConfig), storedId);
             } else {
                 window.switchView('view-setup');
+            }
+        });
+
+        // --- Ctrl+S 拦截逻辑 (核心更新) ---
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault(); // 阻止浏览器默认保存行为
+                
+                // 立即触发保存
+                window.triggerSave();
+                
+                // 提供视觉反馈
+                const container = document.getElementById('save-status-container');
+                const text = document.getElementById('save-status-text');
+                container.classList.add('status-saving');
+                text.innerText = "FORCE SAVE...";
+                
+                // 1秒后恢复 READY 状态 (如果 triggerSave 没有覆盖的话)
+                setTimeout(() => {
+                    if (text.innerText === "FORCE SAVE...") {
+                        // updateSaveStatus 会自动处理状态，这里只是保险
+                    }
+                }, 800);
             }
         });
 
